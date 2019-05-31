@@ -14,6 +14,110 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+///
+.function-container {
+	text-align: center;
+}
+.function-icon__first {
+	margin-top: 35px;
+}
+.function-icon__text {
+	text-align: center;
+	margin-top: 0px;
+	font-size: .85em;
+}
+.function-icon__text-first {
+	margin-top: -5px;
+}
+.call-option-icon {
+	display: inline;
+	transform: translateY(8px);
+	margin: 0 7px;
+	margin-right: 13px;
+}
+.call-option {
+	margin-left: 10px;
+	font-size: .8em;
+	cursor: pointer;
+}
+.call-option-badge {
+	text-align: center;
+	border-radius: 20px;
+	background: red;
+	margin-left: 70px;
+	display: inline-block;
+	width: 15px;
+}
+.none {
+	display: none;
+}
+.fax-list, .fax-data {
+	//border: 1px solid orange;
+}
+.fax-data-list {
+	display: flex;
+	list-style: none;
+	justify-content: space-around;
+}
+.fax-data-item {
+	text-align: center;
+	padding: 5px 20px;
+	border-radius: 5px;
+	background: rebeccapurple;
+}
+hr {
+	visibility: hidden;
+}
+table {
+	width: 90%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	margin: 0 auto;
+	margin-top: 50px;
+}
+th, td {
+	text-align: start;
+	padding-top: 10px;
+	padding-bottom: 0;
+	padding-left: 15px;
+}
+th {
+	margin: 15px 0;
+}
+placeholder {
+	padding-left: 7px;
+}
+.fax-list-icon {
+	display: inline !important;
+	padding-right: 5px;
+}
+.fax-list-row {
+	margin: 10px 0;
+	background: rebeccapurple;
+}
+.fax-item-new {
+	width: 10px;
+	height: 10px;
+	border-radius: 50px;
+	background: limegreen;
+}
+.fax-data-input {
+	display: flex;
+	justify-content: center !important;
+	flex-direction: column !important;
+	border-radius: 3px;
+	border: 1px solid #e7e7e7;
+	line-height: 35px;
+	border: none;
+}
+
+.fax-search {
+	display: flex;
+	justify-content: center;
+	//text-align: center !important;
+}
+///
+
 .mx_TagPanel {
     flex: 1;
     background-color: $tagpanel-bg-color;

@@ -14,37 +14,43 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { MatrixClient } from 'matrix-js-sdk';
-import TagOrderStore from '../../stores/TagOrderStore';
+import React from "react";
+import PropTypes from "prop-types";
+import { MatrixClient } from "matrix-js-sdk";
+import TagOrderStore from "../../stores/TagOrderStore";
 
-import GroupActions from '../../actions/GroupActions';
+import GroupActions from "../../actions/GroupActions";
 
-import sdk from '../../index';
-import dis from '../../dispatcher';
-import { _t } from '../../languageHandler';
+import sdk from "../../index";
+import dis from "../../dispatcher";
+import { _t } from "../../languageHandler";
 
-import { Droppable } from 'react-beautiful-dnd';
-import classNames from 'classnames';
+import { Droppable } from "react-beautiful-dnd";
+import classNames from "classnames";
 
 const TagPanel = React.createClass({
-    displayName: 'TagPanel',
+    displayName: "TagPanel",
 
     contextTypes: {
-        matrixClient: PropTypes.instanceOf(MatrixClient),
+        matrixClient: PropTypes.instanceOf(MatrixClient)
     },
 
     getInitialState() {
         return {
+            active: { chat: true, calls: false, schedule: false },
             orderedTags: [],
-            selectedTags: [],
+            selectedTags: []
         };
     },
 
     componentWillMount: function() {
+        console.log("THIS IS TAGPANEL STATE\n", this.state);
+        console.log("*************************");
         this.unmounted = false;
-        this.context.matrixClient.on("Group.myMembership", this._onGroupMyMembership);
+        this.context.matrixClient.on(
+            "Group.myMembership",
+            this._onGroupMyMembership
+        );
         this.context.matrixClient.on("sync", this._onClientSync);
 
         this._tagOrderStoreToken = TagOrderStore.addListener(() => {
@@ -53,7 +59,7 @@ const TagPanel = React.createClass({
             }
             this.setState({
                 orderedTags: TagOrderStore.getOrderedTags() || [],
-                selectedTags: TagOrderStore.getSelectedTags(),
+                selectedTags: TagOrderStore.getSelectedTags()
             });
         });
         // This could be done by anything with a matrix client
@@ -62,7 +68,10 @@ const TagPanel = React.createClass({
 
     componentWillUnmount() {
         this.unmounted = true;
-        this.context.matrixClient.removeListener("Group.myMembership", this._onGroupMyMembership);
+        this.context.matrixClient.removeListener(
+            "Group.myMembership",
+            this._onGroupMyMembership
+        );
         this.context.matrixClient.removeListener("sync", this._onClientSync);
         if (this._filterStoreToken) {
             this._filterStoreToken.remove();
@@ -80,85 +89,152 @@ const TagPanel = React.createClass({
         const reconnected = syncState !== "ERROR" && prevState !== syncState;
         if (reconnected) {
             // Load joined groups
-            dis.dispatch(GroupActions.fetchJoinedGroups(this.context.matrixClient));
+            dis.dispatch(
+                GroupActions.fetchJoinedGroups(this.context.matrixClient)
+            );
         }
     },
 
     onMouseDown(e) {
         // only dispatch if its not a no-op
         if (this.state.selectedTags.length > 0) {
-            dis.dispatch({action: 'deselect_tags'});
+            dis.dispatch({ action: "deselect_tags" });
         }
+    },
+
+    onShowCall() {
+        console.log("CHANGE TO CALL STATE TO ACTIVE");
+        console.log("CHANGE TO CALL STATE TO ACTIVE");
+        console.log("CHANGE TO CALL STATE TO ACTIVE");
+        dis.dispatch({ action: "show_calls" });
     },
 
     onCreateGroupClick(ev) {
         ev.stopPropagation();
-        dis.dispatch({action: 'view_create_group'});
+        dis.dispatch({ action: "view_create_group" });
     },
 
     onClearFilterClick(ev) {
-        dis.dispatch({action: 'deselect_tags'});
+        dis.dispatch({ action: "deselect_tags" });
     },
-
     render() {
-        const DNDTagTile = sdk.getComponent('elements.DNDTagTile');
-        const AccessibleButton = sdk.getComponent('elements.AccessibleButton');
-        const TintableSvg = sdk.getComponent('elements.TintableSvg');
-        const GeminiScrollbarWrapper = sdk.getComponent("elements.GeminiScrollbarWrapper");
-
+        const DNDTagTile = sdk.getComponent("elements.DNDTagTile");
+        const AccessibleButton = sdk.getComponent("elements.AccessibleButton");
+        const TintableSvg = sdk.getComponent("elements.TintableSvg");
+        const GeminiScrollbarWrapper = sdk.getComponent(
+            "elements.GeminiScrollbarWrapper"
+        );
         const tags = this.state.orderedTags.map((tag, index) => {
-            return <DNDTagTile
-                key={tag}
-                tag={tag}
-                index={index}
-                selected={this.state.selectedTags.includes(tag)}
-            />;
+            return (
+                <DNDTagTile
+                    key={tag}
+                    tag={tag}
+                    index={index}
+                    selected={this.state.selectedTags.includes(tag)}
+                />
+            );
         });
 
         const itemsSelected = this.state.selectedTags.length > 0;
 
         let clearButton;
         if (itemsSelected) {
-            clearButton = <AccessibleButton className="mx_TagPanel_clearButton" onClick={this.onClearFilterClick}>
-                <TintableSvg src={require("../../../res/img/icons-close.svg")} width="24" height="24"
-                             alt={_t("Clear filter")}
-                             title={_t("Clear filter")}
-                />
-            </AccessibleButton>;
+            clearButton = (
+                <AccessibleButton
+                    className="mx_TagPanel_clearButton"
+                    onClick={this.onClearFilterClick}
+                >
+                    <TintableSvg
+                        src={require("../../../res/img/icons-close.svg")}
+                        width="24"
+                        height="24"
+                        alt={_t("Clear filter")}
+                        title={_t("Clear filter")}
+                    />
+                </AccessibleButton>
+            );
         }
 
-        const classes = classNames('mx_TagPanel', {
-            mx_TagPanel_items_selected: itemsSelected,
+        const classes = classNames("mx_TagPanel", {
+            mx_TagPanel_items_selected: itemsSelected
         });
 
-        return <div className={classes}>
-            <div className="mx_TagPanel_clearButton_container">
-                { clearButton }
-            </div>
-            <div className="mx_TagPanel_divider" />
-            <GeminiScrollbarWrapper
-                className="mx_TagPanel_scroller"
-                autoshow={true}
-                // XXX: Use onMouseDown as a workaround for https://github.com/atlassian/react-beautiful-dnd/issues/273
-                // instead of onClick. Otherwise we experience https://github.com/vector-im/riot-web/issues/6253
-                onMouseDown={this.onMouseDown}
-            >
-                <Droppable
-                    droppableId="tag-panel-droppable"
-                    type="draggable-TagTile"
+        const callActive = () => {
+            this.setState({
+                active: { chat: false, calls: true, schedule: false }
+            });
+        };
+        const chatActive = () => {
+            this.setState({
+                active: { chat: true, calls: false, schedule: false }
+            });
+        };
+        const scheduleActive = () => {
+            this.setState({
+                active: { chat: false, calls: false, schedule: true }
+            });
+        };
+
+        //THE ICONS NEED TO BE PLACED HERE
+        return (
+            <div className={classes}>
+                <div className="mx_TagPanel_clearButton_container">
+                    {clearButton}
+                </div>
+                <div className="mx_TagPanel_divider" />
+                <GeminiScrollbarWrapper
+                    className="mx_TagPanel_scroller"
+                    autoshow={true}
+                    // XXX: Use onMouseDown as a workaround for https://github.com/atlassian/react-beautiful-dnd/issues/273
+                    // instead of onClick. Otherwise we experience https://github.com/vector-im/riot-web/issues/6253
+                    onMouseDown={this.onMouseDown}
                 >
-                    { (provided, snapshot) => (
+                    <div onClick={chatActive} className="function-container">
+                        <img
+                            className="function-icon__first"
+                            src="https://img.icons8.com/nolan/40/000000/collaboration.png"
+                        />
+                        <p className="function-icon__text function-icon__text-first">
+                            Company
+                        </p>
+                    </div>
+                    <div
+                        onClick={this.onShowCall}
+                        className="function-container"
+                    >
+                        <img
+                            className="function-icon"
+                            src="https://img.icons8.com/nolan/40/000000/phone-office.png"
+                        />
+                        <p className="function-icon__text">Calls</p>
+                    </div>
+                    <div
+                        onClick={scheduleActive}
+                        className="function-container"
+                    >
+                        <img
+                            className="function-icon"
+                            src="https://img.icons8.com/nolan/40/000000/overtime.png"
+                        />
+                        <p className="function-icon__text">Schedule</p>
+                    </div>
+                    <Droppable
+                        droppableId="tag-panel-droppable"
+                        type="draggable-TagTile"
+                    >
+                        {(provided, snapshot) => (
                             <div
                                 className="mx_TagPanel_tagTileContainer"
                                 ref={provided.innerRef}
                             >
-                                { tags }
-                                { provided.placeholder }
+                                {tags}
+                                {provided.placeholder}
                             </div>
-                    ) }
-                </Droppable>
-            </GeminiScrollbarWrapper>
-        </div>;
-    },
+                        )}
+                    </Droppable>
+                </GeminiScrollbarWrapper>
+            </div>
+        );
+    }
 });
 export default TagPanel;

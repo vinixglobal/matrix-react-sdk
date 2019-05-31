@@ -18,10 +18,14 @@ const emailRegex = /^\S+@\S+\.\S+$/;
 
 const mxUserIdRegex = /^@\S+:\S+$/;
 const mxRoomIdRegex = /^!\S+:\S+$/;
+const phoneRegex = /^(\d{9}|\d{10})/;
 
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 export const addressTypes = [
-    'mx-user-id', 'mx-room-id', 'email',
+    "mx-user-id",
+    "mx-room-id",
+    "email",
+    "phone-number"
 ];
 
 // PropType definition for an object describing
@@ -37,21 +41,24 @@ export const UserAddressType = PropTypes.shape({
     // true if the address is known to be a valid address (eg. is a real
     // user we've seen) or false otherwise (eg. is just an address the
     // user has entered)
-    isKnown: PropTypes.bool,
+    isKnown: PropTypes.bool
 });
 
 export function getAddressType(inputText) {
     const isEmailAddress = emailRegex.test(inputText);
     const isUserId = mxUserIdRegex.test(inputText);
     const isRoomId = mxRoomIdRegex.test(inputText);
+    const isPhoneNumber = phoneRegex.test(inputText);
 
     // sanity check the input for user IDs
     if (isEmailAddress) {
-        return 'email';
+        return "email";
     } else if (isUserId) {
-        return 'mx-user-id';
+        return "mx-user-id";
     } else if (isRoomId) {
-        return 'mx-room-id';
+        return "mx-room-id";
+    } else if (isPhoneNumber) {
+        return "phone-number";
     } else {
         return null;
     }
