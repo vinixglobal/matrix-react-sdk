@@ -46,6 +46,7 @@ const LIST_ORDERS = {
     "m.favourite": "manual",
     "im.vector.fake.invite": "recent",
     "u.phone": "importance",
+    "u.doors": "importance",
     "im.vector.fake.recent": "recent",
     "im.vector.fake.direct": "recent",
     "m.lowpriority": "recent",
@@ -106,6 +107,7 @@ class RoomListStore extends Store {
             "m.favourite": [],
             "im.vector.fake.recent": [],
             "u.phone": [],
+            "u.doors": [],
             "im.vector.fake.direct": [],
             "m.lowpriority": [],
             "im.vector.fake.archived": []
@@ -637,6 +639,7 @@ class RoomListStore extends Store {
             "m.server_notice": [],
             "im.vector.fake.invite": [],
             "u.phone": [],
+            "u.doors": [],
             "m.favourite": [],
             "im.vector.fake.recent": [],
             "im.vector.fake.direct": [],

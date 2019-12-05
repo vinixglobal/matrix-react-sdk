@@ -59,12 +59,81 @@ module.exports = createReactClass({
     },
 
     render: function() {
+        // Quick buttons should be set depending on state
+        // mute-unmute
+        // hold-unhold
+        // mute-unmute
+        //let type = "mute";
+        let type = "hold";
+        //let type = "transfer";
+        let quickButton;
+        switch (type) {
+            case "mute":
+                quickButton = (
+                    <div className="quickButton quickButton-mute">
+                        <img
+                            src={require("../../../../res/img/blast-mute.png")}
+                            width="20"
+                            height="20"
+                            alt="mute"
+                        />
+                    </div>
+                );
+                break;
+            case "hold":
+                quickButton = (
+                    <div className="quickButton quickButton-hold">
+                        <img
+                            src={require("../../../../res/img/blast-hold.png")}
+                            width="20"
+                            height="20"
+                            alt="hold"
+                        />
+                    </div>
+                );
+                break;
+            case "transfer":
+                quickButton = (
+                    <div className="quickButton quickButton-transfer">
+                        <img
+                            src={require("../../../../res/img/blast-transfer.png")}
+                            width="20"
+                            height="20"
+                            alt="transfer"
+                        />
+                    </div>
+                );
+                break;
+            default:
+                return;
+        }
+
+        //let showButton = true;
+        /*let quickButton = showButton ? (
+            <div className="quickButton">
+                <img
+                    src={require("../../../../res/img/blast-mute.png")}
+                    width="20"
+                    height="20"
+                    alt="mute"
+                />
+            </div>
+        ) : null;*/
+
+        // THESE WILL BE USED IN QUICK BUTTONS
+        const Unmute = <div className="unmute">Unmute</div>;
+        const Unhold = <div className="unhold">Unhold</div>;
+        const Untransfer = <div className="untransfer">Untransfer</div>;
+
         return (
-            <div>
+            <div className="in-session">
                 <p className="mx_TextualEvent call-timer">
                     {this.formatSingleDigit(this.state.hours)}:
                     {this.formatSingleDigit(this.state.minutes)}:
                     {this.formatSingleDigit(this.state.seconds)}
+                    {/*{mute ? <Unmute /> : false} //SHOULD HAVE ON_CLICK FUNCTION
+                    {hold ? <Unhold /> : false}
+                    {transfer ? <Untransfer /> : false} */}
                     {/*
                     {this.state.hours < 10
                         ? `0${this.state.hours}`
@@ -78,6 +147,7 @@ module.exports = createReactClass({
                         ? `0${this.state.seconds}`
                         : `${this.state.seconds}`} */}
                 </p>
+                {quickButton}
             </div>
         );
     }

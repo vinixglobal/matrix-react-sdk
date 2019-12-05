@@ -611,15 +611,15 @@ module.exports = createReactClass({
                     >
                         <img
                             className="mx_RoomTileContextMenu_tag_icon"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-hangup.png")}
+                            width="24"
+                            height="24"
                         />
                         <img
                             className="mx_RoomTileContextMenu_tag_icon_set"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-hangup.png")}
+                            width="24"
+                            height="24"
                         />
                         {_t("Hangup")}
                     </AccessibleButton>
@@ -630,15 +630,15 @@ module.exports = createReactClass({
                     >
                         <img
                             className="mx_RoomTileContextMenu_tag_icon"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-mute.png")}
+                            width="24"
+                            height="24"
                         />
                         <img
                             className="mx_RoomTileContextMenu_tag_icon_set"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-mute.png")}
+                            width="24"
+                            height="24"
                         />
                         {_t("Mute")}
                     </AccessibleButton>
@@ -649,15 +649,15 @@ module.exports = createReactClass({
                     >
                         <img
                             className="mx_RoomTileContextMenu_tag_icon"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-hold.png")}
+                            width="24"
+                            height="24"
                         />
                         <img
                             className="mx_RoomTileContextMenu_tag_icon_set"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-hold.png")}
+                            width="24"
+                            height="24"
                         />
                         {_t("Hold")}
                     </AccessibleButton>
@@ -668,15 +668,15 @@ module.exports = createReactClass({
                     >
                         <img
                             className="mx_RoomTileContextMenu_tag_icon"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-transfer.png")}
+                            width="24"
+                            height="24"
                         />
                         <img
                             className="mx_RoomTileContextMenu_tag_icon_set"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-transfer.png")}
+                            width="24"
+                            height="24"
                         />
                         {_t("Transfer")}
                     </AccessibleButton>
@@ -687,15 +687,15 @@ module.exports = createReactClass({
                     >
                         <img
                             className="mx_RoomTileContextMenu_tag_icon"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-dialpad.png")}
+                            width="24"
+                            height="24"
                         />
                         <img
                             className="mx_RoomTileContextMenu_tag_icon_set"
-                            src={require("../../../../res/img/hangup.svg")}
-                            width="15"
-                            height="15"
+                            src={require("../../../../res/img/blast-dialpad.png")}
+                            width="24"
+                            height="24"
                         />
                         {_t("Dialpad")}
                     </AccessibleButton>

@@ -355,6 +355,7 @@ module.exports = createReactClass({
         const callState = call ? call.call_state : "ended";
         // NEED LOGIC TO CANCEL OUT PREVIOUS CALL STATE
         // IF HOLD THEN MUTE IS CLICKED, ONLY MUTE SHOULD BE SHOWN
+        //const mute = true;
         const mute = call ? (call.mute ? call.mute : false) : false;
         const hold = call ? (call.hold ? call.hold : false) : false;
         const transfer = call ? (call.transfer ? call.transfer : false) : false;
@@ -659,6 +660,12 @@ module.exports = createReactClass({
                     });
                     break;
                 default:
+                    // XXX remove this after testing
+                    // How willl call timer states be input?
+                    callButtons = (
+                        <CallTimer mute={false} transfer={false} hold={false} />
+                    );
+                    return;
                 //return;
             }
         }

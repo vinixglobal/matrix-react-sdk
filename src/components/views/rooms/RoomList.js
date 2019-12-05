@@ -805,7 +805,7 @@ module.exports = createReactClass({
             if (this.state.incomingCallTag !== tagName) return null;
             return this.state.incomingCall;
         };
-        // incomingCallIfTaggedAs = im.vector.fake.direct, archived, invite, u.phone
+        // incomingCallIfTaggedAs = im.vector.fake.direct, archived, invite, u.phone, u.doors
         let subLists = [
             {
                 list: [],
@@ -838,6 +838,18 @@ module.exports = createReactClass({
                     dis.dispatch({ action: "view_create_phone_call" });
                 },
                 addRoomLabel: _t("Place call")
+            },
+            {
+                list: this.state.lists["u.doors"],
+                //list: [],
+                label: _t("Doors"),
+                tagName: "u.doors",
+                order: "recent",
+                incomingCall: incomingCallIfTaggedAs("u.doors")
+                //onAddRoom: () => {
+                //dis.dispatch({ action: "view_create_phone_call" });
+                //}
+                //addRoomLabel: _t("Place call")
             },
             {
                 list: this.state.lists["im.vector.fake.direct"],

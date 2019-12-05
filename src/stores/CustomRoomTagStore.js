@@ -20,7 +20,7 @@ import EventEmitter from "events";
 import { throttle } from "lodash";
 import SettingsStore from "../settings/SettingsStore";
 
-const STANDARD_TAGS_REGEX = /^(m\.(favourite|lowpriority|server_notice)|im\.vector\.fake\.(invite|recent|phone|direct|archived))$/;
+const STANDARD_TAGS_REGEX = /^(m\.(favourite|lowpriority|server_notice)|im\.vector\.fake\.(invite|recent|phone|doors|direct|archived))$/;
 
 function commonPrefix(a, b) {
     const len = Math.min(a.length, b.length);
@@ -86,9 +86,9 @@ class CustomRoomTagStore extends EventEmitter {
         const roomLists = RoomListStore.getRoomLists();
 
         const tagNames = Object.keys(this._state.tags).sort();
-        console.log("\n***************");
-        console.log("TAG NAMES", tagNames);
-        console.log("***************\n");
+        //console.log("\n***************");
+        //console.log("TAG NAMES", tagNames);
+        //console.log("***************\n");
         const prefixes = tagNames.map((name, i) => {
             const isFirst = i === 0;
             const isLast = i === tagNames.length - 1;

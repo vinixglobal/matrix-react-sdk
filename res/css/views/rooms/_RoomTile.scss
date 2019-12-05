@@ -25,6 +25,30 @@ $second-color: #348060;
     width: 24px; */
 }
 
+.in-session {
+    display: flex;
+    align-items: inherit;
+}
+
+.quickButton {
+    border-radius: 40px;
+    height: 20px;
+    width: 20px;
+}
+
+.quickButton-mute {
+    border: 1px solid orange;
+    background: orange;
+}
+.quickButton-hold {
+    border: 1px solid red;
+    background: red;
+}
+.quickButton-transfer {
+    border: 1px solid purple;
+    background: purple;
+}
+
 .call-timer {
     font-size: 13px;
 }
@@ -171,7 +195,7 @@ $second-color: #348060;
     }
 }
 
-.hangup {
+.hangup, .call-timer {
     //position: relative;
     padding-right: 16px;
 }
@@ -180,7 +204,7 @@ $second-color: #348060;
     .call_buttons {
         display: flex;
     }
-    .hangup {
+    .hangup, .call-timer {
         //position: relative;
         padding-right: 0px;
         //z-index: 100;
