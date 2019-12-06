@@ -35,6 +35,7 @@ import SettingsStore from "../../../settings/SettingsStore";
 import { _t } from "../../../languageHandler";
 import CallHandler from "../../../CallHandler";
 import CallTimer from "../elements/CallTimer";
+import QuickButton from "../elements/QuickButton";
 
 module.exports = createReactClass({
     displayName: "RoomTile",
@@ -68,7 +69,7 @@ module.exports = createReactClass({
             notificationCount: this.props.room.getUnreadNotificationCount(),
             selected: this.props.room.roomId === RoomViewStore.getRoomId(),
             statusMessage: this._getStatusMessage(),
-            mute: false,
+            mute: false, // ONLY USED TO DISPLAY CSS CLASSES
             transfer: false,
             hold: false
             //media: true
@@ -160,7 +161,7 @@ module.exports = createReactClass({
                 //this.setState({ hold: true });
                 this.setState({ hold: this.state.hold });
                 break;
-				*/
+            */
             default:
                 return;
         }
@@ -353,6 +354,7 @@ module.exports = createReactClass({
         //console.log("======================");
 
         const callState = call ? call.call_state : "ended";
+        // TODO
         // NEED LOGIC TO CANCEL OUT PREVIOUS CALL STATE
         // IF HOLD THEN MUTE IS CLICKED, ONLY MUTE SHOULD BE SHOWN
         //const mute = true;
@@ -364,7 +366,6 @@ module.exports = createReactClass({
         this.setState({ callState, mute, hold, transfer });
 
         // PROBLEM - why doesn't the current state change the component state?
-        //
     },
 
     render: function() {
@@ -486,7 +487,8 @@ module.exports = createReactClass({
             mx_RoomTile_transparent: this.props.transparent,
             mx_RoomTile_hasSubtext: subtext && !this.props.collapsed,
             mx_RoomTile_calls: this.props.calls,
-            mx_RoomTile_mute: this.state.mute,
+            mx_RoomTile_mute: this.state.mute, // State determines CSS styling
+            //quick_button_mute: this.state.mute, // State determines CSS styling
             mx_RoomTile_transfer: this.state.transfer,
             mx_RoomTile_hold: this.state.hold,
             mx_RoomTile_calling: this.state.callState === "ringback",
@@ -654,7 +656,32 @@ module.exports = createReactClass({
                     });
                     break;
                 case "connected":
-                    callButtons = <CallTimer />;
+                    // TODO
+                    // PROPS SHOULD PASS TO DETERMINE QUICK BUTTON
+                    let type = this.state.mute
+                        ? "mute"
+                        : this.state.hold
+                        ? "hold"
+                        : this.state.transfer
+                        ? "transfer"
+                        : null;
+                    let visible = this.state.mute
+                        ? "quick_button_mute"
+                        : this.state.hold
+                        ? "quick_button_hold"
+                        : this.state.transfer
+                        ? "quick_button_transfer"
+                        : "hide_quick";
+                    callButtons = (
+                        <React.Fragment>
+                            <CallTimer
+                                mute={false}
+                                transfer={false}
+                                hold={false}
+                            />
+                            <QuickButton type={type} className={visible} />
+                        </React.Fragment>
+                    );
                     this.setState({
                         notificationCount: 0
                     });
@@ -662,9 +689,9 @@ module.exports = createReactClass({
                 default:
                     // XXX remove this after testing
                     // How willl call timer states be input?
-                    callButtons = (
-                        <CallTimer mute={false} transfer={false} hold={false} />
-                    );
+                    // callButtons = (
+                    // <CallTimer mute={false} transfer={false} hold={false} />
+                    // );
                     return;
                 //return;
             }
