@@ -72,9 +72,9 @@ global.mxCalls = {
 };
 const calls = global.mxCalls;
 
-console.log("\n++++++++++++++++");
-console.log("WHAT IS CALLS", calls);
-console.log("++++++++++++++++\n");
+//console.log("\n++++++++++++++++");
+//console.log("WHAT IS CALLS", calls);
+//console.log("++++++++++++++++\n");
 
 let ConferenceHandler = null;
 
@@ -125,7 +125,7 @@ function _reAttemptCall(call) {
 }
 
 function _setCallListeners(call) {
-    console.log("CHECK IF THERE IS A LISTENER FOR MUTE <line 128>", call);
+    //console.log("CHECK IF THERE IS A LISTENER FOR MUTE <line 128>", call);
     call.on("error", function(err) {
         console.error("Call error:", err);
         if (err.code === "unknown_devices") {
@@ -175,15 +175,15 @@ function _setCallListeners(call) {
         }
     });
     call.on("hangup", function() {
-        console.log("HANGUP EVENT HANDLER RUN IN CALL_HANDLER <line 178>");
+        //console.log("HANGUP EVENT HANDLER RUN IN CALL_HANDLER <line 178>");
         _setCallState(undefined, call.roomId, "ended");
     });
     // IS THERE A LISTENER FOR MUTE?
     // NO
     call.on("mute", function() {
-        console.log("------------------------");
-        console.log("MUTE FROM CALL HANDLER");
-        console.log("------------------------");
+        //console.log("------------------------");
+        //console.log("MUTE FROM CALL HANDLER");
+        //console.log("------------------------");
         //_setCallState(undefined, call.roomId, "mute");
     });
     // map web rtc states to dummy UI state
@@ -232,20 +232,7 @@ function _setCallListeners(call) {
         } else if (newState === "connected") {
             _setCallState(call, call.roomId, "connected");
             pause("ringbackAudio");
-            // DO NOT CHANGE CALL STATE
-            // CALL STATE SHOULD ALWAYS BE CONNECTED FOR ACTIVE CALL
-        } /* else if (newState === "mute") {
-            console.log(
-                "NEW CALL STATE SET TO MUTE, <line 224 CallHandler.js>"
-            );
-            //_setCallState(call, call.roomId, "mute");
-        } else if (newState === "hold") {
-            //_setCallState(call, call.roomId, "hold");
-        } else if (newState === "transfer") {
-            //_setCallState(call, call.roomId, "transfer");
-        } else if (newState === "dialpad") {
-            //_setCallState(call, call.roomId, "dialpad");
-        }*/
+        }
     });
 }
 
@@ -255,11 +242,11 @@ function _setCallState(call, roomId, status) {
     // status => stop_ringback, connected, ringback
     // CALL HANDLER HAS STATUS && CALL STATE
 
-    console.log("************ CALL HANDLER ****************");
-    console.log("call is: ", call);
-    console.log("room ID: ", roomId);
-    console.log("STATUS: ", status); // status = 'connected'
-    console.log("************ CALL HANDLER ****************");
+    //console.log("************ CALL HANDLER ****************");
+    //console.log("call is: ", call);
+    //console.log("room ID: ", roomId);
+    //console.log("STATUS: ", status); // status = 'connected'
+    //console.log("************ CALL HANDLER ****************");
 
     console.log(
         `Call state in ${roomId} changed to ${status} (${
@@ -298,7 +285,7 @@ function _setCallState(call, roomId, status) {
     if (status === "transfer") {
         // SETTING STATUS AS STATE WILL ALWAYS HAVE CALL 'CONNECTED'
         call.call_state = "connected";
-        call.transfer = !transfer;
+        call.transfer = !call.transfer;
     }
 
     dis.dispatch({
@@ -401,12 +388,15 @@ function _onAction(payload) {
     switch (payload.action) {
         // THIS IS WHERE THE STATE IN ROOM TILE SHOULD BE CHANGED TO MUTE = TRUE
         case "mute":
+            console.log("Call status set to MUTE");
             _setCallState(payload.call, payload.room_id, payload.action);
             break;
         case "hold":
+            console.log("Call status set to HOLD");
             _setCallState(payload.call, payload.room_id, payload.action);
             break;
         case "transfer":
+            console.log("Call status set to TRANSFER");
             _setCallState(payload.call, payload.room_id, payload.action);
             break;
         case "place_call": // LIMITS CALLS

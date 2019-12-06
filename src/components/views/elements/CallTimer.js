@@ -1,10 +1,9 @@
 import React from "react";
 import createReactClass from "create-react-class";
+import classNames from "classnames";
 
 module.exports = createReactClass({
     displayName: "CallTimer",
-
-    // GET INITIAL STATE IS CONSTRUCTOR
     getInitialState: function() {
         return {
             seconds: 0,
@@ -19,7 +18,7 @@ module.exports = createReactClass({
     },
 
     componentWillUnmount() {
-        this.startTimer();
+        this.stopTimer();
     },
 
     startTimer: function() {
@@ -45,13 +44,11 @@ module.exports = createReactClass({
                     this.setState({ seconds: this.state.seconds + 1 });
                 }
             }, 1000);
-        } else {
-            clearInterval(this.state.timer);
         }
     },
 
     stopTimer: function() {
-        clearInterval();
+        clearInterval(this.state.timer);
     },
 
     formatSingleDigit(num) {
@@ -59,95 +56,17 @@ module.exports = createReactClass({
     },
 
     render: function() {
-        // Quick buttons should be set depending on state
-        // mute-unmute
-        // hold-unhold
-        // mute-unmute
-        //let type = "mute";
-        let type = "hold";
-        //let type = "transfer";
-        let quickButton;
-        switch (type) {
-            case "mute":
-                quickButton = (
-                    <div className="quickButton quickButton-mute">
-                        <img
-                            src={require("../../../../res/img/blast-mute.png")}
-                            width="20"
-                            height="20"
-                            alt="mute"
-                        />
-                    </div>
-                );
-                break;
-            case "hold":
-                quickButton = (
-                    <div className="quickButton quickButton-hold">
-                        <img
-                            src={require("../../../../res/img/blast-hold.png")}
-                            width="20"
-                            height="20"
-                            alt="hold"
-                        />
-                    </div>
-                );
-                break;
-            case "transfer":
-                quickButton = (
-                    <div className="quickButton quickButton-transfer">
-                        <img
-                            src={require("../../../../res/img/blast-transfer.png")}
-                            width="20"
-                            height="20"
-                            alt="transfer"
-                        />
-                    </div>
-                );
-                break;
-            default:
-                return;
-        }
-
-        //let showButton = true;
-        /*let quickButton = showButton ? (
-            <div className="quickButton">
-                <img
-                    src={require("../../../../res/img/blast-mute.png")}
-                    width="20"
-                    height="20"
-                    alt="mute"
-                />
-            </div>
-        ) : null;*/
-
-        // THESE WILL BE USED IN QUICK BUTTONS
-        const Unmute = <div className="unmute">Unmute</div>;
-        const Unhold = <div className="unhold">Unhold</div>;
-        const Untransfer = <div className="untransfer">Untransfer</div>;
+        const classes = classNames({
+            "in-session": true
+        });
 
         return (
-            <div className="in-session">
+            <div className={classes}>
                 <p className="mx_TextualEvent call-timer">
                     {this.formatSingleDigit(this.state.hours)}:
                     {this.formatSingleDigit(this.state.minutes)}:
                     {this.formatSingleDigit(this.state.seconds)}
-                    {/*{mute ? <Unmute /> : false} //SHOULD HAVE ON_CLICK FUNCTION
-                    {hold ? <Unhold /> : false}
-                    {transfer ? <Untransfer /> : false} */}
-                    {/*
-                    {this.state.hours < 10
-                        ? `0${this.state.hours}`
-                        : `${this.state.hours}`}
-                    :
-                    {this.state.minutes < 10
-                        ? `0${this.state.minutes}`
-                        : `${this.state.minutes}`}
-                    :
-                    {this.state.seconds < 10
-                        ? `0${this.state.seconds}`
-                        : `${this.state.seconds}`} */}
                 </p>
-                {quickButton}
             </div>
         );
     }
