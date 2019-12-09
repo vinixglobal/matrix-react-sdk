@@ -13,10 +13,10 @@ module.exports = createReactClass({
     },
     render: function() {
         // PROPS WILL PASS INTO TYPE TO DETERMINE STYLING AND FUNCTIONALITY
-        console.log("WHAT IS THIS CALL_TIMER: PROPS?", this.props);
-        console.log("WHAT IS THIS CALL_TIMER: STATE?", this.state);
+        // console.log("WHAT IS THIS CALL_TIMER: PROPS?", this.props);
+        // console.log("WHAT IS THIS CALL_TIMER: STATE?", this.state);
         let type = this.props.type;
-        //let type = "mute";
+        // let type = "mute";
         let quickButton;
 
         switch (type) {

@@ -696,7 +696,12 @@ module.exports = createReactClass({
                 //return;
             }
         }
+
         // END OF RENDER FUNCTION
+        //console.log("\n----");
+        //console.log("*** THIS IS THE DATA FROM THE ROOM TILE", this.props);
+        //console.log("----\n");
+        //console.log("Need to pass this to room_id in MatrixChat.js");
 
         return (
             <AccessibleButton
