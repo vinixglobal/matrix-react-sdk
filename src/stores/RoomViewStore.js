@@ -14,12 +14,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import dis from '../dispatcher';
-import {Store} from 'flux/utils';
-import MatrixClientPeg from '../MatrixClientPeg';
-import sdk from '../index';
-import Modal from '../Modal';
-import { _t } from '../languageHandler';
+import dis from "../dispatcher";
+import { Store } from "flux/utils";
+import MatrixClientPeg from "../MatrixClientPeg";
+import sdk from "../index";
+import Modal from "../Modal";
+import { _t } from "../languageHandler";
 
 const INITIAL_STATE = {
     // Whether we're joining the currently viewed room (see isJoining())
@@ -43,15 +43,16 @@ const INITIAL_STATE = {
 
     forwardingEvent: null,
 
-    quotingEvent: null,
+    quotingEvent: null
 };
 
 /**
  * A class for storing application state for RoomView. This is the RoomView's interface
-*  with a subset of the js-sdk.
+ *  with a subset of the js-sdk.
  *  ```
  */
 class RoomViewStore extends Store {
+    // #1
     constructor() {
         super(dis);
 
@@ -59,11 +60,13 @@ class RoomViewStore extends Store {
         this._state = INITIAL_STATE;
     }
 
+    // #2
     _setState(newState) {
         this._state = Object.assign(this._state, newState);
         this.__emitChange();
     }
 
+    // #3
     __onDispatch(payload) {
         switch (payload.action) {
             // view_room:
@@ -72,70 +75,89 @@ class RoomViewStore extends Store {
             //      - event_id:     '$213456782:matrix.org'
             //      - event_offset: 100
             //      - highlighted:  true
-            case 'view_room':
+            case "view_room":
+                console.log("****");
+                console.log(
+                    "<RoomViewStore> VIEW ROOM ACTION DISPATCHED: DATA =>",
+                    payload
+                );
+                console.log("****");
                 this._viewRoom(payload);
                 break;
-            case 'view_my_groups':
-            case 'view_group':
+            case "view_my_groups":
+            case "view_group":
                 this._setState({
                     roomId: null,
-                    roomAlias: null,
+                    roomAlias: null
                 });
                 break;
-            case 'view_room_error':
+            case "view_room_error":
                 this._viewRoomError(payload);
                 break;
-            case 'will_join':
+            case "will_join":
                 this._setState({
-                    joining: true,
+                    joining: true
                 });
                 break;
-            case 'cancel_join':
+            case "cancel_join":
                 this._setState({
-                    joining: false,
+                    joining: false
                 });
                 break;
             // join_room:
             //      - opts: options for joinRoom
-            case 'join_room':
+            case "join_room":
                 this._joinRoom(payload);
                 break;
-            case 'join_room_error':
+            case "join_room_error":
                 this._joinRoomError(payload);
                 break;
-            case 'on_client_not_viable':
-            case 'on_logged_out':
+            case "on_client_not_viable":
+            case "on_logged_out":
                 this.reset();
                 break;
-            case 'forward_event':
+            case "forward_event":
                 this._setState({
-                    forwardingEvent: payload.event,
+                    forwardingEvent: payload.event
                 });
                 break;
-            case 'reply_to_event':
+            case "reply_to_event":
                 // If currently viewed room does not match the room in which we wish to reply then change rooms
                 // this can happen when performing a search across all rooms
-                if (payload.event && payload.event.getRoomId() !== this._state.roomId) {
+                if (
+                    payload.event &&
+                    payload.event.getRoomId() !== this._state.roomId
+                ) {
                     dis.dispatch({
-                        action: 'view_room',
+                        action: "view_room",
                         room_id: payload.event.getRoomId(),
-                        replyingToEvent: payload.event,
+                        replyingToEvent: payload.event
                     });
                 } else {
                     this._setState({
-                        replyingToEvent: payload.event,
+                        replyingToEvent: payload.event
                     });
                 }
                 break;
-            case 'open_room_settings': {
-                const RoomSettingsDialog = sdk.getComponent("dialogs.RoomSettingsDialog");
-                Modal.createTrackedDialog('Room settings', '', RoomSettingsDialog, {
-                    roomId: payload.room_id || this._state.roomId,
-                }, /*className=*/null, /*isPriority=*/false, /*isStatic=*/true);
+            case "open_room_settings": {
+                const RoomSettingsDialog = sdk.getComponent(
+                    "dialogs.RoomSettingsDialog"
+                );
+                Modal.createTrackedDialog(
+                    "Room settings",
+                    "",
+                    RoomSettingsDialog,
+                    {
+                        roomId: payload.room_id || this._state.roomId
+                    },
+                    /*className=*/ null,
+                    /*isPriority=*/ false,
+                    /*isStatic=*/ true
+                );
                 break;
             }
         }
-    }
+    } // END OF DISPATCH
 
     _viewRoom(payload) {
         if (payload.room_id) {
@@ -148,25 +170,29 @@ class RoomViewStore extends Store {
                 roomLoading: false,
                 roomLoadError: null,
                 // should peek by default
-                shouldPeek: payload.should_peek === undefined ? true : payload.should_peek,
+                shouldPeek:
+                    payload.should_peek === undefined
+                        ? true
+                        : payload.should_peek,
                 // have we sent a join request for this room and are waiting for a response?
                 joining: payload.joining || false,
                 // Reset replyingToEvent because we don't want cross-room because bad UX
                 replyingToEvent: null,
                 // pull the user out of Room Settings
-                isEditingSettings: false,
+                isEditingSettings: false
             };
-
             // Allow being given an event to be replied to when switching rooms but sanity check its for this room
-            if (payload.replyingToEvent && payload.replyingToEvent.getRoomId() === payload.room_id) {
+            if (
+                payload.replyingToEvent &&
+                payload.replyingToEvent.getRoomId() === payload.room_id
+            ) {
                 newState.replyingToEvent = payload.replyingToEvent;
             }
-
             if (this._state.forwardingEvent) {
                 dis.dispatch({
-                    action: 'send_event',
+                    action: "send_event",
                     room_id: newState.roomId,
-                    event: this._state.forwardingEvent,
+                    event: this._state.forwardingEvent
                 });
             }
 
@@ -184,27 +210,31 @@ class RoomViewStore extends Store {
                 isInitialEventHighlighted: null,
                 roomAlias: payload.room_alias,
                 roomLoading: true,
-                roomLoadError: null,
+                roomLoadError: null
             });
-            MatrixClientPeg.get().getRoomIdForAlias(payload.room_alias).done(
-            (result) => {
-                dis.dispatch({
-                    action: 'view_room',
-                    room_id: result.room_id,
-                    event_id: payload.event_id,
-                    highlighted: payload.highlighted,
-                    room_alias: payload.room_alias,
-                    auto_join: payload.auto_join,
-                    oob_data: payload.oob_data,
-                });
-            }, (err) => {
-                dis.dispatch({
-                    action: 'view_room_error',
-                    room_id: null,
-                    room_alias: payload.room_alias,
-                    err: err,
-                });
-            });
+            MatrixClientPeg.get()
+                .getRoomIdForAlias(payload.room_alias)
+                .done(
+                    result => {
+                        dis.dispatch({
+                            action: "view_room",
+                            room_id: result.room_id,
+                            event_id: payload.event_id,
+                            highlighted: payload.highlighted,
+                            room_alias: payload.room_alias,
+                            auto_join: payload.auto_join,
+                            oob_data: payload.oob_data
+                        });
+                    },
+                    err => {
+                        dis.dispatch({
+                            action: "view_room_error",
+                            room_id: null,
+                            room_alias: payload.room_alias,
+                            err: err
+                        });
+                    }
+                );
         }
     }
 
@@ -213,51 +243,66 @@ class RoomViewStore extends Store {
             roomId: payload.room_id,
             roomAlias: payload.room_alias,
             roomLoading: false,
-            roomLoadError: payload.err,
+            roomLoadError: payload.err
         });
     }
 
     _joinRoom(payload) {
         this._setState({
-            joining: true,
+            joining: true
         });
-        MatrixClientPeg.get().joinRoom(
-            this._state.roomAlias || this._state.roomId, payload.opts,
-        ).done(() => {
-            // We don't actually need to do anything here: we do *not*
-            // clear the 'joining' flag because the Room object and/or
-            // our 'joined' member event may not have come down the sync
-            // stream yet, and that's the point at which we'd consider
-            // the user joined to the room.
-        }, (err) => {
-            dis.dispatch({
-                action: 'join_room_error',
-                err: err,
-            });
-            let msg = err.message ? err.message : JSON.stringify(err);
-            // XXX: We are relying on the error message returned by browsers here.
-            // This isn't great, but it does generalize the error being shown to users.
-            if (msg && msg.startsWith("CORS request rejected")) {
-                msg = _t("There was an error joining the room");
-            }
-            if (err.errcode === 'M_INCOMPATIBLE_ROOM_VERSION') {
-                msg = <div>
-                    {_t("Sorry, your homeserver is too old to participate in this room.")}<br />
-                    {_t("Please contact your homeserver administrator.")}
-                </div>;
-            }
-            const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
-            Modal.createTrackedDialog('Failed to join room', '', ErrorDialog, {
-                title: _t("Failed to join room"),
-                description: msg,
-            });
-        });
+        MatrixClientPeg.get()
+            .joinRoom(this._state.roomAlias || this._state.roomId, payload.opts)
+            .done(
+                () => {
+                    // We don't actually need to do anything here: we do *not*
+                    // clear the 'joining' flag because the Room object and/or
+                    // our 'joined' member event may not have come down the sync
+                    // stream yet, and that's the point at which we'd consider
+                    // the user joined to the room.
+                },
+                err => {
+                    dis.dispatch({
+                        action: "join_room_error",
+                        err: err
+                    });
+                    let msg = err.message ? err.message : JSON.stringify(err);
+                    // XXX: We are relying on the error message returned by browsers here.
+                    // This isn't great, but it does generalize the error being shown to users.
+                    if (msg && msg.startsWith("CORS request rejected")) {
+                        msg = _t("There was an error joining the room");
+                    }
+                    if (err.errcode === "M_INCOMPATIBLE_ROOM_VERSION") {
+                        msg = (
+                            <div>
+                                {_t(
+                                    "Sorry, your homeserver is too old to participate in this room."
+                                )}
+                                <br />
+                                {_t(
+                                    "Please contact your homeserver administrator."
+                                )}
+                            </div>
+                        );
+                    }
+                    const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+                    Modal.createTrackedDialog(
+                        "Failed to join room",
+                        "",
+                        ErrorDialog,
+                        {
+                            title: _t("Failed to join room"),
+                            description: msg
+                        }
+                    );
+                }
+            );
     }
 
     _joinRoomError(payload) {
         this._setState({
             joining: false,
-            joinError: payload.err,
+            joinError: payload.err
         });
     }
 

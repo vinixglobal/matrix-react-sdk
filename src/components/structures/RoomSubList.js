@@ -192,7 +192,7 @@ const RoomSubList = createReactClass({
     },
 
     onRoomTileClick(roomId, ev) {
-        console.log("RUNNING onRoomTileClick method");
+        //console.log("RUNNING onRoomTileClick method");
         // #1 Room tile click
         // Need to check for tag
         // depending on tag dispatch appropriate action
