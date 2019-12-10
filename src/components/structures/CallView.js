@@ -10,13 +10,10 @@ module.exports = createReactClass({
         };
     },
     render: function() {
+        // Data needs to be passed into here
         return (
             <div>
-                <h1>SalesForce</h1>
-                <h1>ZenDesk</h1>
-                <h1>Microsoft Dynamics</h1>
-                <h1>Kazoo</h1>
-                <h1>Contacts</h1>
+                <div>Should display the other user's meta data</div>
             </div>
         );
     }

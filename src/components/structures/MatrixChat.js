@@ -46,7 +46,7 @@ import {
 } from "../../RoomInvite";
 import * as Rooms from "../../Rooms";
 import linkifyMatrix from "../../linkify-matrix";
-import * as Lifecycle from "../../Lifecycle";
+import * as Lifecycle from "../../Lifecycle"; // Application state to do with authentication
 // LifecycleStore is not used but does listen to and dispatch actions
 import "../../stores/LifecycleStore";
 import PageTypes from "../../PageTypes";
@@ -115,6 +115,7 @@ const ONBOARDING_FLOW_STARTERS = [
     "view_create_group"
 ];
 
+// Arg is the object
 export default createReactClass({
     // we export this so that the integration tests can use it :-S
     statics: {
@@ -167,6 +168,7 @@ export default createReactClass({
 
     getInitialState: function() {
         const s = {
+            counter: 0,
             // the master view we are showing.
             view: VIEWS.LOADING,
 
@@ -237,11 +239,14 @@ export default createReactClass({
         return { serverConfig: props };
     },
 
+    // LIFECYCLE OF COMPONENT #1
     componentWillMount: function() {
+        console.log("COMPONENT WILL MOUNT #1");
+        // handles the initial screen for first view and authentication
         // this.props.config only uses data from the config.json
         SdkConfig.put(this.props.config);
 
-        // Used by _viewRoom before getting state from sync
+        // Used by viewRoom before getting state from sync
         this.firstSyncComplete = false;
         this.firstSyncPromise = Promise.defer();
 
@@ -254,12 +259,17 @@ export default createReactClass({
         // rerender.
         // initial screen is room/!asdf.vinix.im
         this._screenAfterLogin = this.props.initialScreenAfterLogin;
+        // THIS is the first screen - which is the last room visited
+        console.log("***");
+        console.log("WHAT IS SCREEN AFTER LOGIN", this._screenAfterLogin);
+        console.log("***");
 
         this._windowWidth = 10000;
         this.handleResize();
         window.addEventListener("resize", this.handleResize);
 
-        this._pageChanging = false;
+        //this._pageChanging = true;
+        this._pageChanging = false; // DEFAULT
 
         // check we have the right tint applied for this theme.
         // N.B. we don't call the whole of setTheme() here as we may be
@@ -281,9 +291,10 @@ export default createReactClass({
         }
     },
 
+    // LIFECYCLE OF COMPONENT #2
     componentDidMount: function() {
+        console.log("COMPONENT DID MOUNT #2");
         this.dispatcherRef = dis.register(this.onAction);
-
         this.focusComposer = false;
 
         // object field used for tracking the status info appended to the title tag.
@@ -372,7 +383,9 @@ export default createReactClass({
         // to try logging out.
     },
 
+    // LIFECYCLE OF COMPONENT #3
     componentWillUnmount: function() {
+        console.log("Component Will unmount #3");
         Lifecycle.stopMatrixClient();
         dis.unregister(this.dispatcherRef);
         window.removeEventListener("focus", this.onFocus);
@@ -383,13 +396,18 @@ export default createReactClass({
         );
     },
 
+    // LIFECYCLE OF COMPONENT #4
     componentWillUpdate: function(props, state) {
+        // this runs onClick RoomTile
+        console.log("Component Will Update #4");
         if (this.shouldTrackPageChange(this.state, state)) {
             this.startPageChangeTimer();
         }
     },
 
+    // LIFECYCLE OF COMPONENT #5
     componentDidUpdate: function(prevProps, prevState) {
+        console.log("Component Did Update #5");
         if (this.shouldTrackPageChange(prevState, this.state)) {
             const durationMs = this.stopPageChangeTimer();
             Analytics.trackPageChange(durationMs);
@@ -492,6 +510,7 @@ export default createReactClass({
         //console.log("PAYLOAD.ACTION", payload.action);
         //console.log("**************\n");
 
+        // PAYLOAD
         switch (payload.action) {
             case "MatrixActions.accountData":
                 // XXX: This is a collection of several hacks to solve a minor problem. We want to
@@ -627,9 +646,11 @@ export default createReactClass({
                 this._viewUser(payload.userId, payload.subAction);
                 break;
             case "call_view":
-                this._callView();
+                console.log("<line 649> DISPATCHING CALL_VIEW ACTION");
+                this._callView(payload);
                 break;
             case "view_room":
+                console.log("<line 653> DISPATCHING VIEW_ROOM ACTION");
                 // Takes either a room ID or room alias: if switching to a room the client is already
                 // known to be in (eg. user clicks on a room in the recents panel), supply the ID
                 // If the user is clicking on a room in the context of the alias being presented
@@ -857,7 +878,7 @@ export default createReactClass({
                     showCookieBar: false
                 });
                 break;
-        }
+        } // end of actions
     },
 
     // SETS NEW PAGE_TYPE
@@ -897,6 +918,12 @@ export default createReactClass({
 
     // TODO: Move to RoomViewStore
     _viewNextRoom: function(roomIndexDelta) {
+        // prev is -1
+        // next is  1
+        console.log(
+            "WHAT IS THE ROOM INDEX DELTA FOR NEXT_ROOM",
+            roomIndexDelta
+        );
         const allRooms = RoomListSorter.mostRecentActivityFirst(
             MatrixClientPeg.get().getRooms()
         );
@@ -924,8 +951,8 @@ export default createReactClass({
         });
     },
 
-    // TODO: Move to RoomViewStore
     _viewIndexedRoom: function(roomIndex) {
+        console.log("WHAT IS THE ROOM INDEX", roomIndex);
         const allRooms = RoomListSorter.mostRecentActivityFirst(
             MatrixClientPeg.get().getRooms()
         );
@@ -935,15 +962,6 @@ export default createReactClass({
                 room_id: allRooms[roomIndex].roomId
             });
         }
-    },
-
-    // CALL VIEW
-    _callView: function() {
-        const newState = {
-            view: VIEWS.LOGGED_IN,
-            page_type: PageTypes.CallView
-        };
-        this.setState(newState);
     },
 
     // switch view to the given room
@@ -964,11 +982,17 @@ export default createReactClass({
     //                               that has been passed out-of-band (eg.
     //                               room name and avatar from an invite email)
     // ROOM VIEW
+    // onClick this gets dispatched
     _viewRoom: function(roomInfo) {
+        // WHAT DOES THIS DO?
+        console.log("***");
+        console.log("WHAT DATA IS IN THE ARG of _viewRoom", roomInfo);
+        console.log("***");
         this.focusComposer = true;
 
         const newState = {
             view: VIEWS.LOGGED_IN,
+            // roomInfo.room_id sets initial room
             currentRoomId: roomInfo.room_id || null,
             page_type: PageTypes.RoomView,
             thirdPartyInvite: roomInfo.third_party_invite,
@@ -976,6 +1000,13 @@ export default createReactClass({
             viaServers: roomInfo.via_servers
         };
 
+        console.log("---");
+        // console.log("THIS RUNS FIRST _viewRoom", this.state);
+        // always dispatches the view_room action
+        console.log("What is roomInfo", roomInfo);
+        console.log("---");
+
+        // TODO need to check if room has a u.phone tag!!!
         if (roomInfo.room_alias) {
             console.log(
                 `Switching to room alias ${roomInfo.room_alias} at event ` +
@@ -1030,6 +1061,114 @@ export default createReactClass({
             });
         });
     }, // end of viewRoom method
+
+    // CALL VIEW
+    // TODO not transferring to correct roomId
+    // Need to get the room's id
+    _callView: function(roomInfo) {
+        console.log("CALL VIEW METHOD");
+        console.log("WHAT IS THE PAYLOAD", roomInfo);
+        this.focusComposer = true;
+
+        const newState = {
+            view: VIEWS.LOGGED_IN,
+            // roomInfo.room_id sets initial room
+            currentRoomId: roomInfo.room_id || null,
+            page_type: PageTypes.CallView,
+            thirdPartyInvite: roomInfo.third_party_invite,
+            roomOobData: roomInfo.oob_data,
+            viaServers: roomInfo.via_servers
+        };
+
+        // TODO need to check if room has a u.phone tag!!!
+        if (roomInfo.room_alias) {
+            console.log(
+                `Switching to room alias ${roomInfo.room_alias} at event ` +
+                    roomInfo.event_id
+            );
+        } else {
+            console.log(
+                `Switching to room id ${roomInfo.room_id} at event ` +
+                    roomInfo.event_id
+            );
+        }
+
+        // Wait for the first sync to complete so that if a room does have an alias,
+        // it would have been retrieved.
+        let waitFor = Promise.resolve(null);
+        if (!this.firstSyncComplete) {
+            if (!this.firstSyncPromise) {
+                console.warn(
+                    "Cannot view a room before first sync. room_id:",
+                    roomInfo.room_id
+                );
+                return;
+            }
+            waitFor = this.firstSyncPromise.promise;
+        }
+
+        waitFor.done(() => {
+            let presentedId = roomInfo.room_alias || roomInfo.room_id;
+            const room = MatrixClientPeg.get().getRoom(roomInfo.room_id);
+
+            if (room) {
+                const theAlias = Rooms.getDisplayAliasForRoom(room);
+                if (theAlias) presentedId = theAlias;
+
+                // Store this as the ID of the last room accessed. This is so that we can
+                // persist which room is being stored across refreshes and browser quits.
+                if (localStorage) {
+                    localStorage.setItem("mx_last_room_id", room.roomId);
+                }
+            }
+
+            if (roomInfo.event_id && roomInfo.highlighted) {
+                presentedId += "/" + roomInfo.event_id;
+            }
+            newState.ready = true;
+
+            // BLAST
+            // SHOULD DISPATCH A VIEW_CALL ACTION IF THE ROOM CONTAINS A PHONE TAG
+            // DONE IN THE ROOM SUB LIST
+            this.setState(newState, () => {
+                this.notifyNewScreen("room/" + presentedId);
+            });
+        });
+        //console.log("WHAT IS THE PROPS", this.props);
+        //console.log("WHAT IS THE STATE", this.state);
+        /*
+        const allRooms = RoomListSorter.mostRecentActivityFirst(
+            MatrixClientPeg.get().getRooms()
+        );
+        console.log("**** WHAT IS ALL ROOMS?", allRooms);
+        console.log("======");
+        console.log("IS THIS THE CURRENT ROOM", this.state.currentRoomid);
+        console.log("======");
+        let roomIndex = -1;
+        for (let i = 0; i < allRooms.length; ++i) {
+            if (allRooms[i].roomId == this.state.currentRoomId) {
+                roomIndex = i;
+                break;
+            }
+        }
+        */
+        /*
+        let roomIndexDelta = 0;
+        roomIndex = (roomIndex + roomIndexDelta) % allRooms.length;
+        if (roomIndex < 0) roomIndex = allRooms.length - 1;
+        console.log("WHAT IS THE ROOM INDEX", roomIndex);
+        const newState = {
+            view: VIEWS.LOGGED_IN,
+            page_type: PageTypes.CallView,
+            room_id: this.state.currentRoomId
+            //room_id: allRooms[roomIndex].roomId
+        };
+        */
+        //this.setState(newState);
+        //console.log("UPDATE *****");
+        //console.log("THIS IS THE NEW STATE", this.state);
+        //console.log("UPDATE *****");
+    },
 
     _viewGroup: function(payload) {
         const groupId = payload.group_id;
@@ -1276,6 +1415,12 @@ export default createReactClass({
                             }
 
                             if (this.state.currentRoomId === roomId) {
+                                console.log("<line 1321> view next room");
+                                console.log(
+                                    "this.state.currentRoomId",
+                                    this.state.currentRoomId
+                                );
+                                console.log("roomId", roomId);
                                 dis.dispatch({ action: "view_next_room" });
                             }
                         },
@@ -2089,6 +2234,9 @@ export default createReactClass({
     },
 
     render: function() {
+        //console.log("COUNTER: ", this.state.counter);
+        //this.setState({ counter: this.state.counter + 1 }); // RENDER SHOULD BE PURE
+
         let view;
         if (
             this.state.view === VIEWS.LOADING ||
@@ -2225,6 +2373,7 @@ export default createReactClass({
         }
 
         const ErrorBoundary = sdk.getComponent("elements.ErrorBoundary");
+        //console.log("VIEW ENUMERABLE IS: ", this.state.view);
         return <ErrorBoundary>{view}</ErrorBoundary>;
     }
 });

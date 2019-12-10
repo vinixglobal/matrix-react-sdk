@@ -192,24 +192,35 @@ const RoomSubList = createReactClass({
     },
 
     onRoomTileClick(roomId, ev) {
-        dis.dispatch({
-            action: "view_room",
-            room_id: roomId,
-            clear_search:
-                ev &&
-                (ev.keyCode === KeyCode.ENTER || ev.keyCode === KeyCode.SPACE)
-        });
+        console.log("RUNNING onRoomTileClick method");
+        // #1 Room tile click
+        // Need to check for tag
+        // depending on tag dispatch appropriate action
+        // if u.phone dispatch 'call_view'
+        // if notag then dispatch 'view_room'
+        if (this.props.tagName === "u.phone") {
+            dis.dispatch({
+                action: "call_view",
+                room_id: roomId,
+                clear_search:
+                    ev &&
+                    (ev.keyCode === KeyCode.ENTER ||
+                        ev.keyCode === KeyCode.SPACE)
+            });
+        } else {
+            dis.dispatch({
+                action: "view_room",
+                room_id: roomId,
+                clear_search:
+                    ev &&
+                    (ev.keyCode === KeyCode.ENTER ||
+                        ev.keyCode === KeyCode.SPACE)
+            });
+        }
     },
 
-    onRoomTileClickCall(roomId, ev) {
-        dis.dispatch({
-            action: "call_view",
-            room_id: roomId,
-            clear_search:
-                ev &&
-                (ev.keyCode === KeyCode.ENTER || ev.keyCode === KeyCode.SPACE)
-        });
-    },
+    //onRoomTileClickCall(roomId, ev) {
+    //},
 
     _updateSubListCount: function() {
         // Force an update by setting the state to the current state
@@ -239,11 +250,7 @@ const RoomSubList = createReactClass({
                 isInvite={this.props.isInvite}
                 refreshSubList={this._updateSubListCount}
                 incomingCall={null}
-                onClick={
-                    this.props.tagName === "u.phone"
-                        ? this.onRoomTileClickCall
-                        : this.onRoomTileClick
-                }
+                onClick={this.onRoomTileClick}
             />
         );
     },
@@ -256,6 +263,7 @@ const RoomSubList = createReactClass({
             RoomNotifs.getRoomHasBadge(room)
         );
         if (room) {
+            // #2
             dis.dispatch({
                 action: "view_room",
                 room_id: room.roomId
@@ -269,6 +277,7 @@ const RoomSubList = createReactClass({
         e.stopPropagation();
         // switch to first room in sortedList as that'll be the top of the list for the user
         if (this.props.list && this.props.list.length > 0) {
+            // #3 invite badge click
             dis.dispatch({
                 action: "view_room",
                 room_id: this.props.list[0].roomId
@@ -307,11 +316,13 @@ const RoomSubList = createReactClass({
         let badge;
         if (!this.props.collapsed) {
             const badgeClasses = classNames({
-                mx_RoomSubList_badge: true,
+                mx_RoomSubList_badge: false,
+                //mx_RoomSubList_badge: true, // ORIGINAL
                 mx_RoomSubList_badgeHighlight: subListNotifHighlight
             });
             // Wrap the contents in a div and apply styles to the child div so that the browser default outline works
             if (subListNotifCount > 0) {
+                /* HIDDEN
                 badge = (
                     <AccessibleButton
                         className={badgeClasses}
@@ -323,8 +334,10 @@ const RoomSubList = createReactClass({
                         </div>
                     </AccessibleButton>
                 );
+				*/
             } else if (this.props.isInvite && this.props.list.length) {
                 // no notifications but highlight anyway because this is an invite badge
+                /* HIDDEN
                 badge = (
                     <AccessibleButton
                         className={badgeClasses}
@@ -334,6 +347,7 @@ const RoomSubList = createReactClass({
                         <div>{this.props.list.length}</div>
                     </AccessibleButton>
                 );
+				*/
             }
         }
 
@@ -398,7 +412,7 @@ const RoomSubList = createReactClass({
                     <span>{this.props.label}</span>
                     {incomingCall}
                 </AccessibleButton>
-                {badge}
+                {/*{badge}*/}
                 {addRoomButton}
             </div>
         );
