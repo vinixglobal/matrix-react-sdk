@@ -43,6 +43,7 @@ function inviteMultipleToRoom(roomId, addrs) {
 }
 
 export function showStartPhoneInviteDialog() {
+    // TAGS SHOULD BE SET HERE!!!
     const AddressPickerDialog = sdk.getComponent("dialogs.AddressPickerDialog");
 
     Modal.createTrackedDialog(
@@ -140,13 +141,23 @@ export function isValid3pidInvite(event) {
     return true;
 }
 function _onStartCallFinished(shouldInvite, addrs) {
+    // TODO PRIORITY
+    // THIS IS THE END FUNCTION OF PHONE CALL
+    // TAGS SHOULD BE SET HERE FOR U.PHONE
     if (!shouldInvite) return;
 
     const addrTexts = addrs.map(addr => addr.address);
+    //console.log("'''''''''''''");
+    //console.log("WHAT IS ADDR TEXTS", addrTexts); // modal input 954 123 1234 no spaces
+    //console.log("'''''''''''''");
 
+    // THIS DOESN'T MATTER IT
+    // PHONE CALLS ARE ALWAYS BRAND NEW
     if (_isDmChat(addrTexts)) {
-        console.log("WHAT IS ADDRESS TEXTS", addrTexts);
+        console.log("DM CHAT IS RUNNING!!! <line 155>");
+        //console.log("WHAT IS ADDRESS TEXTS", addrTexts);
         const rooms = _getDirectMessageRooms(addrTexts[0]);
+
         if (rooms.length > 0) {
             // A Direct Message room already exists for this user, so reuse it
             dis.dispatch({
@@ -174,9 +185,12 @@ function _onStartCallFinished(shouldInvite, addrs) {
             });
         }
     } else if (addrTexts.length === 1) {
+        console.log("STARTING NEW PHONE CALL ROOM");
         // Start a new DM chat
+        // THIS IS WHERE TAGS SHOULD BE SET
         createRoom({ dmUserId: addrTexts[0] }).catch(err => {
             const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+            // DOESN'T NEED ERROR CHECKING
             Modal.createTrackedDialog("Failed to start chat", "", ErrorDialog, {
                 title: _t("Failed to start chat"),
                 description:
@@ -184,7 +198,9 @@ function _onStartCallFinished(shouldInvite, addrs) {
             });
         });
     } else {
+        // THIS WOULD BE USEFUL FOR CONFERENCE CALLS
         // Start multi user chat
+        /*
         let room;
         createRoom()
             .then(roomId => {
@@ -209,6 +225,7 @@ function _onStartCallFinished(shouldInvite, addrs) {
                             : _t("Operation failed")
                 });
             });
+			*/
     }
 }
 
@@ -309,6 +326,7 @@ function _onRoomInviteFinished(roomId, shouldInvite, addrs) {
 
 // TODO: Immutable DMs replaces this
 function _isDmChat(addrTexts) {
+    console.log("RUNNING DM CHAT CHECK", _isDmChat);
     if (
         addrTexts.length === 1 &&
         getAddressType(addrTexts[0]) === "mx-user-id"

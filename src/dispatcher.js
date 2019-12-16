@@ -33,7 +33,7 @@ class MatrixDispatcher extends flux.Dispatcher {
         // Allow for asynchronous dispatching by accepting payloads that have the
         // type `function (dispatch) {...}`
         if (typeof payload === "function") {
-            console.log("THIS IS THE PAYLOAD", payload);
+            //console.log("THIS IS THE PAYLOAD", payload);
             payload(action => {
                 this.dispatch(action, sync);
             });

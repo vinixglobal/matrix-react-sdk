@@ -241,7 +241,7 @@ export default createReactClass({
 
     // LIFECYCLE OF COMPONENT #1
     componentWillMount: function() {
-        console.log("COMPONENT WILL MOUNT #1");
+        //console.log("COMPONENT WILL MOUNT #1");
         // handles the initial screen for first view and authentication
         // this.props.config only uses data from the config.json
         SdkConfig.put(this.props.config);
@@ -257,12 +257,12 @@ export default createReactClass({
         // a thing to call showScreen with once login completes.  this is kept
         // outside this.state because updating it should never trigger a
         // rerender.
-        // initial screen is room/!asdf.vinix.im
+        // initial screen is room/!qwer.vinix.im
         this._screenAfterLogin = this.props.initialScreenAfterLogin;
         // THIS is the first screen - which is the last room visited
-        console.log("***");
-        console.log("WHAT IS SCREEN AFTER LOGIN", this._screenAfterLogin);
-        console.log("***");
+        //console.log("***");
+        //console.log("WHAT IS SCREEN AFTER LOGIN", this._screenAfterLogin);
+        //console.log("***");
 
         this._windowWidth = 10000;
         this.handleResize();
@@ -293,7 +293,7 @@ export default createReactClass({
 
     // LIFECYCLE OF COMPONENT #2
     componentDidMount: function() {
-        console.log("COMPONENT DID MOUNT #2");
+        //console.log("COMPONENT DID MOUNT #2");
         this.dispatcherRef = dis.register(this.onAction);
         this.focusComposer = false;
 
@@ -385,7 +385,7 @@ export default createReactClass({
 
     // LIFECYCLE OF COMPONENT #3
     componentWillUnmount: function() {
-        console.log("Component Will unmount #3");
+        //console.log("Component Will unmount #3");
         Lifecycle.stopMatrixClient();
         dis.unregister(this.dispatcherRef);
         window.removeEventListener("focus", this.onFocus);
@@ -399,7 +399,7 @@ export default createReactClass({
     // LIFECYCLE OF COMPONENT #4
     componentWillUpdate: function(props, state) {
         // this runs onClick RoomTile
-        console.log("Component Will Update #4");
+        //console.log("Component Will Update #4");
         if (this.shouldTrackPageChange(this.state, state)) {
             this.startPageChangeTimer();
         }
@@ -407,7 +407,7 @@ export default createReactClass({
 
     // LIFECYCLE OF COMPONENT #5
     componentDidUpdate: function(prevProps, prevState) {
-        console.log("Component Did Update #5");
+        //console.log("Component Did Update #5");
         if (this.shouldTrackPageChange(prevState, this.state)) {
             const durationMs = this.stopPageChangeTimer();
             Analytics.trackPageChange(durationMs);
@@ -646,11 +646,11 @@ export default createReactClass({
                 this._viewUser(payload.userId, payload.subAction);
                 break;
             case "call_view":
-                console.log("<line 649> DISPATCHING CALL_VIEW ACTION");
+                //console.log("<line 649> DISPATCHING CALL_VIEW ACTION");
                 this._callView(payload);
                 break;
             case "view_room":
-                console.log("<line 653> DISPATCHING VIEW_ROOM ACTION");
+                //console.log("<line 653> DISPATCHING VIEW_ROOM ACTION");
                 // Takes either a room ID or room alias: if switching to a room the client is already
                 // known to be in (eg. user clicks on a room in the recents panel), supply the ID
                 // If the user is clicking on a room in the context of the alias being presented
@@ -920,10 +920,6 @@ export default createReactClass({
     _viewNextRoom: function(roomIndexDelta) {
         // prev is -1
         // next is  1
-        console.log(
-            "WHAT IS THE ROOM INDEX DELTA FOR NEXT_ROOM",
-            roomIndexDelta
-        );
         const allRooms = RoomListSorter.mostRecentActivityFirst(
             MatrixClientPeg.get().getRooms()
         );
@@ -985,9 +981,9 @@ export default createReactClass({
     // onClick this gets dispatched
     _viewRoom: function(roomInfo) {
         // WHAT DOES THIS DO?
-        console.log("***");
-        console.log("WHAT DATA IS IN THE ARG of _viewRoom", roomInfo);
-        console.log("***");
+        //console.log("***");
+        //console.log("WHAT DATA IS IN THE ARG of _viewRoom", roomInfo);
+        //console.log("***");
         this.focusComposer = true;
 
         const newState = {
@@ -1000,11 +996,11 @@ export default createReactClass({
             viaServers: roomInfo.via_servers
         };
 
-        console.log("---");
+        //console.log("---");
         // console.log("THIS RUNS FIRST _viewRoom", this.state);
         // always dispatches the view_room action
-        console.log("What is roomInfo", roomInfo);
-        console.log("---");
+        //console.log("What is roomInfo", roomInfo);
+        //console.log("---");
 
         // TODO need to check if room has a u.phone tag!!!
         if (roomInfo.room_alias) {
@@ -1066,8 +1062,8 @@ export default createReactClass({
     // TODO not transferring to correct roomId
     // Need to get the room's id
     _callView: function(roomInfo) {
-        console.log("CALL VIEW METHOD");
-        console.log("WHAT IS THE PAYLOAD", roomInfo);
+        //console.log("CALL VIEW METHOD");
+        //console.log("WHAT IS THE PAYLOAD", roomInfo);
         this.focusComposer = true;
 
         const newState = {
@@ -1134,40 +1130,8 @@ export default createReactClass({
                 this.notifyNewScreen("room/" + presentedId);
             });
         });
-        //console.log("WHAT IS THE PROPS", this.props);
-        //console.log("WHAT IS THE STATE", this.state);
-        /*
-        const allRooms = RoomListSorter.mostRecentActivityFirst(
-            MatrixClientPeg.get().getRooms()
-        );
-        console.log("**** WHAT IS ALL ROOMS?", allRooms);
-        console.log("======");
-        console.log("IS THIS THE CURRENT ROOM", this.state.currentRoomid);
-        console.log("======");
-        let roomIndex = -1;
-        for (let i = 0; i < allRooms.length; ++i) {
-            if (allRooms[i].roomId == this.state.currentRoomId) {
-                roomIndex = i;
-                break;
-            }
-        }
-        */
-        /*
-        let roomIndexDelta = 0;
-        roomIndex = (roomIndex + roomIndexDelta) % allRooms.length;
-        if (roomIndex < 0) roomIndex = allRooms.length - 1;
-        console.log("WHAT IS THE ROOM INDEX", roomIndex);
-        const newState = {
-            view: VIEWS.LOGGED_IN,
-            page_type: PageTypes.CallView,
-            room_id: this.state.currentRoomId
-            //room_id: allRooms[roomIndex].roomId
-        };
-        */
-        //this.setState(newState);
-        //console.log("UPDATE *****");
-        //console.log("THIS IS THE NEW STATE", this.state);
-        //console.log("UPDATE *****");
+        // TODO
+        // dispatch an action to pass props to CallView
     },
 
     _viewGroup: function(payload) {

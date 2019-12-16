@@ -388,15 +388,15 @@ function _onAction(payload) {
     switch (payload.action) {
         // THIS IS WHERE THE STATE IN ROOM TILE SHOULD BE CHANGED TO MUTE = TRUE
         case "mute":
-            console.log("Call status set to MUTE");
+            //console.log("Call status set to MUTE");
             _setCallState(payload.call, payload.room_id, payload.action);
             break;
         case "hold":
-            console.log("Call status set to HOLD");
+            //console.log("Call status set to HOLD");
             _setCallState(payload.call, payload.room_id, payload.action);
             break;
         case "transfer":
-            console.log("Call status set to TRANSFER");
+            //console.log("Call status set to TRANSFER");
             _setCallState(payload.call, payload.room_id, payload.action);
             break;
         case "place_call": // LIMITS CALLS
@@ -437,8 +437,12 @@ function _onAction(payload) {
                     console.error("Room %s does not exist.", payload.room_id);
                     return;
                 }
-
+                // TODO
+                // pass props to PARENT COMPONENT
                 const members = room.getJoinedMembers();
+                // console.log("*******");
+                // console.log("WHAT IS THE MEMBERS?", members);
+                // console.log("*******");
                 if (members.length <= 1) {
                     const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
                     Modal.createTrackedDialog(
@@ -462,9 +466,13 @@ function _onAction(payload) {
                         MatrixClientPeg.get(),
                         payload.room_id
                     );
+                    // PLACE CALL
+                    // console.log("WHAT IS THE CALL?", call);
                     placeCall(call);
+                    //console.log("WILL THIS RUN ON CLICK OF PLACE CALL METHOD");
+                    //this.forceUpdate();
                 } else {
-                    // > 2
+                    // > 2 because <= handled above
                     dis.dispatch({
                         action: "place_conference_call",
                         room_id: payload.room_id,
@@ -476,7 +484,7 @@ function _onAction(payload) {
             }
             break;
         case "place_conference_call":
-            console.log("Place conference call in %s", payload.room_id);
+            //console.log("Place conference call in %s", payload.room_id);
             _startCallApp(payload.room_id, payload.type);
             break;
         case "incoming_call":

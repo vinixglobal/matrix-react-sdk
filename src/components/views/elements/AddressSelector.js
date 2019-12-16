@@ -15,15 +15,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import createReactClass from 'create-react-class';
-import sdk from '../../../index';
-import classNames from 'classnames';
-import { UserAddressType } from '../../../UserAddress';
+import React from "react";
+import PropTypes from "prop-types";
+import createReactClass from "create-react-class";
+import sdk from "../../../index";
+import classNames from "classnames";
+import { UserAddressType } from "../../../UserAddress";
 
 export default createReactClass({
-    displayName: 'AddressSelector',
+    displayName: "AddressSelector",
 
     propTypes: {
         onSelected: PropTypes.func.isRequired,
@@ -36,13 +36,14 @@ export default createReactClass({
         selected: PropTypes.number,
 
         // Element to put as a header on top of the list
-        header: PropTypes.node,
+        header: PropTypes.node
     },
 
     getInitialState: function() {
         return {
-            selected: this.props.selected === undefined ? 0 : this.props.selected,
-            hover: false,
+            selected:
+                this.props.selected === undefined ? 0 : this.props.selected,
+            hover: false
         };
     },
 
@@ -58,9 +59,15 @@ export default createReactClass({
     componentDidUpdate: function() {
         // As the user scrolls with the arrow keys keep the selected item
         // at the top of the window.
-        if (this.scrollElement && this.props.addressList.length > 0 && !this.state.hover) {
-            const elementHeight = this.addressListElement.getBoundingClientRect().height;
-            this.scrollElement.scrollTop = (this.state.selected * elementHeight) - elementHeight;
+        if (
+            this.scrollElement &&
+            this.props.addressList.length > 0 &&
+            !this.state.hover
+        ) {
+            const elementHeight = this.addressListElement.getBoundingClientRect()
+                .height;
+            this.scrollElement.scrollTop =
+                this.state.selected * elementHeight - elementHeight;
         }
     },
 
@@ -68,7 +75,7 @@ export default createReactClass({
         if (this.state.selected > 0) {
             this.setState({
                 selected: 0,
-                hover: false,
+                hover: false
             });
         }
     },
@@ -77,7 +84,7 @@ export default createReactClass({
         if (this.state.selected > 0) {
             this.setState({
                 selected: this.state.selected - 1,
-                hover: false,
+                hover: false
             });
         }
     },
@@ -86,7 +93,7 @@ export default createReactClass({
         if (this.state.selected < this._maxSelected(this.props.addressList)) {
             this.setState({
                 selected: this.state.selected + 1,
-                hover: false,
+                hover: false
             });
         }
     },
@@ -102,7 +109,7 @@ export default createReactClass({
     onMouseEnter: function(index) {
         this.setState({
             selected: index,
-            hover: true,
+            hover: true
         });
     },
 
@@ -126,10 +133,13 @@ export default createReactClass({
 
         // Only create the address elements if there are address
         if (this.props.addressList.length > 0) {
+            //console.log("***");
+            //console.log(this.props.addressList); // ACTUALLY THE INPUT
+            //console.log("***");
             for (let i = 0; i <= maxSelected; i++) {
                 const classes = classNames({
-                    "mx_AddressSelector_addressListElement": true,
-                    "mx_AddressSelector_selected": this.state.selected === i,
+                    mx_AddressSelector_addressListElement: true,
+                    mx_AddressSelector_selected: this.state.selected === i
                 });
 
                 // NOTE: Defaulting to "vector" as the network, until the network backend stuff is done.
@@ -141,8 +151,14 @@ export default createReactClass({
                         onClick={this.onClick.bind(this, i)}
                         onMouseEnter={this.onMouseEnter.bind(this, i)}
                         onMouseLeave={this.onMouseLeave}
-                        key={this.props.addressList[i].addressType + "/" + this.props.addressList[i].address}
-                        ref={(ref) => { this.addressListElement = ref; }}
+                        key={
+                            this.props.addressList[i].addressType +
+                            "/" +
+                            this.props.addressList[i].address
+                        }
+                        ref={ref => {
+                            this.addressListElement = ref;
+                        }}
                     >
                         <AddressTile
                             address={this.props.addressList[i]}
@@ -151,7 +167,7 @@ export default createReactClass({
                             networkName="vector"
                             networkUrl={require("../../../../res/img/search-icon-vector.svg")}
                         />
-                    </div>,
+                    </div>
                 );
             }
         }
@@ -160,21 +176,29 @@ export default createReactClass({
 
     _maxSelected: function(list) {
         const listSize = list.length === 0 ? 0 : list.length - 1;
-        const maxSelected = listSize > (this.props.truncateAt - 1) ? (this.props.truncateAt - 1) : listSize;
+        const maxSelected =
+            listSize > this.props.truncateAt - 1
+                ? this.props.truncateAt - 1
+                : listSize;
         return maxSelected;
     },
 
     render: function() {
         const classes = classNames({
-            "mx_AddressSelector": true,
-            "mx_AddressSelector_empty": this.props.addressList.length === 0,
+            mx_AddressSelector: true,
+            mx_AddressSelector_empty: this.props.addressList.length === 0
         });
 
         return (
-            <div className={classes} ref={(ref) => {this.scrollElement = ref;}}>
-                { this.props.header }
-                { this.createAddressListTiles() }
+            <div
+                className={classes}
+                ref={ref => {
+                    this.scrollElement = ref;
+                }}
+            >
+                {this.props.header}
+                {this.createAddressListTiles()}
             </div>
         );
-    },
+    }
 });

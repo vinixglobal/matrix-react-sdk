@@ -14,39 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import createReactClass from 'create-react-class';
-const sdk = require('../../../index');
-const MatrixClientPeg = require('../../../MatrixClientPeg');
-import { _t } from '../../../languageHandler';
+import React from "react";
+import PropTypes from "prop-types";
+import createReactClass from "create-react-class";
+const sdk = require("../../../index");
+const MatrixClientPeg = require("../../../MatrixClientPeg");
+import { _t } from "../../../languageHandler";
 
 module.exports = createReactClass({
-    displayName: 'RoomNameEditor',
+    displayName: "RoomNameEditor",
 
     propTypes: {
-        room: PropTypes.object.isRequired,
+        room: PropTypes.object.isRequired
     },
 
     getInitialState: function() {
         return {
-            name: null,
+            name: null
         };
     },
 
     componentWillMount: function() {
         const room = this.props.room;
-        const name = room.currentState.getStateEvents('m.room.name', '');
+        const name = room.currentState.getStateEvents("m.room.name", "");
         const myId = MatrixClientPeg.get().credentials.userId;
         const defaultName = room.getDefaultRoomName(myId);
 
         this.setState({
-            name: name ? name.getContent().name : '',
+            name: name ? name.getContent().name : ""
         });
 
         this._placeholderName = _t("Unnamed Room");
-        if (defaultName && defaultName !== 'Empty room') { // default name from JS SDK, needs no translation as we don't ever show it.
+        if (defaultName && defaultName !== "Empty room") {
+            // default name from JS SDK, needs no translation as we don't ever show it.
             this._placeholderName += " (" + defaultName + ")";
+            console.log(
+                "THIS IS THE DEFAULT NAME PLACE HOLDER NAME",
+                this._placehodlerName
+            );
         }
     },
 
@@ -56,7 +61,7 @@ module.exports = createReactClass({
 
     _onValueChanged: function(value, shouldSubmit) {
         this.setState({
-            name: value,
+            name: value
         });
     },
 
@@ -64,16 +69,18 @@ module.exports = createReactClass({
         const EditableText = sdk.getComponent("elements.EditableText");
 
         return (
-                <div className="mx_RoomHeader_name">
-                    <EditableText ref="editor"
-                         className="mx_RoomHeader_nametext mx_RoomHeader_editable"
-                         placeholderClassName="mx_RoomHeader_placeholder"
-                         placeholder={this._placeholderName}
-                         blurToCancel={false}
-                         initialValue={this.state.name}
-                         onValueChanged={this._onValueChanged}
-                         dir="auto" />
-                </div>
+            <div className="mx_RoomHeader_name">
+                <EditableText
+                    ref="editor"
+                    className="mx_RoomHeader_nametext mx_RoomHeader_editable"
+                    placeholderClassName="mx_RoomHeader_placeholder"
+                    placeholder={this._placeholderName}
+                    blurToCancel={false}
+                    initialValue={this.state.name}
+                    onValueChanged={this._onValueChanged}
+                    dir="auto"
+                />
+            </div>
         );
-    },
+    }
 });

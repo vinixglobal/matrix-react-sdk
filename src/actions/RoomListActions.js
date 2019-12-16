@@ -49,6 +49,9 @@ RoomListActions.tagRoom = function(
     newIndex
 ) {
     let metaData = null;
+    console.log(
+        "TAG IS GETTING SET IN ROOM LIST ACTIONS FUNCTION /actions/RoomListActions"
+    ); // NOPE NOT HERE, IN _isDmChat located in RoomInvite Component
 
     // Is the tag ordered manually?
     if (
@@ -87,11 +90,15 @@ RoomListActions.tagRoom = function(
             const promises = [];
             const { roomId } = room;
 
+            console.log("WHAT IS THE OLD TAG", oldTag);
+            console.log("WHAT IS THE NEW TAG", newTag);
+
             // Evil hack to get DMs behaving
             if (
                 (oldTag === undefined && newTag === "im.vector.fake.direct") ||
                 (oldTag === "im.vector.fake.direct" && newTag === undefined)
             ) {
+                console.log("THIS IS A DIRECT CHAT");
                 return Rooms.guessAndSetDMRoom(
                     room,
                     newTag === "im.vector.fake.direct"
@@ -114,6 +121,7 @@ RoomListActions.tagRoom = function(
             }
 
             const hasChangedSubLists = oldTag !== newTag;
+            console.log("WHAT IS hasChangedSubLists?????", hasChangedSubLists);
 
             // More evilness: We will still be dealing with moving to favourites/low prio,
             // but we avoid ever doing a request with 'im.vector.fake.direct`.
@@ -201,6 +209,13 @@ RoomListActions.tagRoom = function(
         },
         () => {
             // For an optimistic update
+            console.log("********************");
+            console.log("WHAT IS THE ROOM LIST ACTIONS DEFAULT RETURN");
+            console.log("ROOM", room);
+            console.log("OLD TAG", oldTag);
+            console.log("NEW TAG", newTag);
+            console.log("META DATA", metaData);
+            console.log("********************");
             return {
                 room,
                 oldTag,

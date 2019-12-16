@@ -69,6 +69,7 @@ module.exports = createReactClass({
             notificationCount: this.props.room.getUnreadNotificationCount(),
             selected: this.props.room.roomId === RoomViewStore.getRoomId(),
             statusMessage: this._getStatusMessage(),
+            callStatus: "idle",
             mute: false, // ONLY USED TO DISPLAY CSS CLASSES
             transfer: false,
             hold: false
@@ -148,6 +149,19 @@ module.exports = createReactClass({
             case "feature_custom_status_changed":
                 this.forceUpdate();
                 break;
+            case "place_call":
+                // CALL STATUSES 'hold', 'mute', 'transfer', 'dialpad', 'ringing'
+                //console.log("<line 153> *******");
+                //console.log("PLACE CALL ACTION IS FORCING UPDATE");
+                //console.log("<line 153> *******");
+                //console.log("***");
+                //console.log("STATE BEFORE UPDATE", this.state);
+                //console.log("----- SEPARATE BEFORE - AFTER -----");
+                this.setState({ callStatus: "ringing" });
+                //this.forceUpdate();
+                //console.log("STATE AFTER UPDATE", this.state);
+                //console.log("***");
+                break;
             //case "mute":
             //this.setState({ mute: !this.state.mute });
             //break;
@@ -190,6 +204,10 @@ module.exports = createReactClass({
             this._onActiveRoomChange
         );
         this.dispatcherRef = dis.register(this.onAction);
+        // console.log("WHAT ACTION GOT DISPATCHED", this.dispatcherRef); // ID_22, ID_24
+        // console.log("\n--------------------");
+        // console.log("THIS IS WHERE THE CLASSES WILL RE-RENDER");
+        // console.log("--------------------\n");
 
         if (this._shouldShowStatusMessage()) {
             const statusUser = this._getStatusMessageUser();
@@ -203,6 +221,7 @@ module.exports = createReactClass({
     },
 
     componentWillUnmount: function() {
+        //console.log("COMPONENT WILL MOUNT RUN <line 224>");
         const cli = MatrixClientPeg.get();
         if (cli) {
             MatrixClientPeg.get().removeListener(
@@ -234,7 +253,11 @@ module.exports = createReactClass({
         // the room tile change.
         this.setState({
             notificationCount: this.props.room.getUnreadNotificationCount()
+            //callState: "ringback"
         });
+        if (this.callState === "ringback") {
+            this.setState({ callState: "ringback" });
+        }
     },
 
     // Do a simple shallow comparison of props and state to avoid unnecessary
@@ -346,6 +369,7 @@ module.exports = createReactClass({
         this._showContextMenu(x, y, chevronOffset);
     },
 
+    // DETERMINES THE ICONS ON HOVER
     callStateCheck: function() {
         const call = this._getCallForRoom();
         //console.log("DOES THIS CALL HAVE ANY DATA FROM MUTE", call);
@@ -354,6 +378,11 @@ module.exports = createReactClass({
         //console.log("======================");
 
         const callState = call ? call.call_state : "ended";
+        //console.log(
+        ///"THIS SHOULD LOOK AT THE CALL STATUS INSTEAD OF STATE", // ENDED
+        //callState
+        //);
+        //console.log("CALL STATUS IS: ", this.state.callStatus); // IDLE
         // TODO
         // NEED LOGIC TO CANCEL OUT PREVIOUS CALL STATE
         // IF HOLD THEN MUTE IS CLICKED, ONLY MUTE SHOULD BE SHOWN
@@ -361,41 +390,65 @@ module.exports = createReactClass({
         const mute = call ? (call.mute ? call.mute : false) : false;
         const hold = call ? (call.hold ? call.hold : false) : false;
         const transfer = call ? (call.transfer ? call.transfer : false) : false;
+        //console.log("MUTE", mute);
+        //console.log("HOLD", hold);
+        //console.log("TRANSFER", transfer);
         //const hold = call.hold;
         //const transfer = call.transfer;
-        this.setState({ callState, mute, hold, transfer });
-
+        //console.log("======");
+        // THIS DOESN'T HAPPEN FAST ENOUGH
+        // Call state is set at 'ended' multiple times before 'ringback' is set
+        //console.log("SETTING NEW CALL STATE TO: ", callState);
+        //console.log("======");
+        this.setState({ callState, mute, hold, transfer }); // THIS SHOULD RE-RENDER
+        //console.log("THIS IS THE CURRENT CALL STATE", this.state.callState);
         // PROBLEM - why doesn't the current state change the component state?
+        // ANSWER - re-render only happens on state or prop change
+    },
+    changeToActive: function() {
+        //console.log("RUNNING CHANGE TO ACTIVE");
+        dis.dispatch({
+            action: "place_call",
+            type: "voice",
+            room_id: this.props.room.roomId
+        });
+        this.setState({ callState: "ringback" });
+        //console.log("*******");
+        //console.log("THIS SHOULD RE_RENDER THE COMPONENT");
+        //console.log("*******");
+    },
+    changeToIdle: function() {
+        this.setState({ callState: "ended" });
+    },
+    phoneCall: function() {
+        this.changeToActive();
+        //this.onVoiceCallClick();
     },
 
     render: function() {
-        //console.log("WHAT IS CALL AFTER RETURNED FROM FUNCTION", call);
-        this.callStateCheck();
-        //console.log("ROOM TILE: STATE", this.state);
-        //console.log("ROOM TILE: PROPS", this.props);
-        // state should not be here constructor will only run when mounted
-        /***  ABOVE IS TEST ***/
-
+        //return <div>CATS</div>; // WORKS
+        this.callStateCheck(); // WHY IS THERE A CHECK EACH TIME -needed for the hover call buttons
+        const AccessibleButton = sdk.getComponent("elements.AccessibleButton");
         const CallButton = props => {
-            const AccessibleButton = sdk.getComponent(
-                "elements.AccessibleButton"
-            );
-            const onVoiceCallClick = ev => {
+            // console.log("DOES THE ROOM TILE COMPONENT STOP ON CALL BUTTON");
+            /*const onVoiceCallClick = ev => {
                 dis.dispatch({
-                    action: "place_call",
+               r    action: "place_call",
                     type: "voice",
                     room_id: props.roomId
                 });
-            };
+            };*/
+            //this.changeToActive();
             return (
                 <AccessibleButton
                     id="call_button"
                     className="mx_MessageComposer_button mx_MessageComposer_voicecall"
-                    onClick={onVoiceCallClick}
+                    onClick={this.phoneCall}
                     title={_t("Voice call")}
                 />
             );
         };
+        //return <div>DOGS</div>; // WORKS
         const VideoButton = props => {
             const AccessibleButton = sdk.getComponent(
                 "elements.AccessibleButton"
@@ -407,6 +460,7 @@ module.exports = createReactClass({
                     room_id: props.roomId
                 });
             };
+            //this.changeToActive();
             return (
                 <AccessibleButton
                     className="mx_MessageComposer_button mx_MessageComposer_videocall"
@@ -415,6 +469,7 @@ module.exports = createReactClass({
                 />
             );
         };
+        //return <div>FISH</div>; // WORKS
         const HangupButton = props => {
             const AccessibleButton = sdk.getComponent(
                 "elements.AccessibleButton"
@@ -427,6 +482,7 @@ module.exports = createReactClass({
                     room_id: call.roomId
                 });
             };
+            //this.changeToIdle();
             return (
                 <AccessibleButton
                     className="mx_MessageComposer_button mx_MessageComposer_hangup"
@@ -461,6 +517,7 @@ module.exports = createReactClass({
             };
         };*/
 
+        //return <div>BEFORE INVITE CHECK</div>; // WORKS
         const isInvite = this.props.room.getMyMembership() === "invite";
         const notificationCount = this.props.notificationCount;
         // var highlightCount = this.props.room.getUnreadNotificationCount("highlight");
@@ -475,6 +532,9 @@ module.exports = createReactClass({
 
         let subtext = null;
 
+        // WHEN THIS CHANGES IT SHOULD UPDATE THE STATE OR PROPS
+        //return <div>BEFORE CLASSES</div>; // WORKS
+        //callStatus: "idle",
         const classes = classNames({
             mx_RoomTile: true,
             mx_RoomTile_selected: this.state.selected,
@@ -487,13 +547,15 @@ module.exports = createReactClass({
             mx_RoomTile_transparent: this.props.transparent,
             mx_RoomTile_hasSubtext: subtext && !this.props.collapsed,
             mx_RoomTile_calls: this.props.calls,
-            mx_RoomTile_mute: this.state.mute, // State determines CSS styling
-            //quick_button_mute: this.state.mute, // State determines CSS styling
-            mx_RoomTile_transfer: this.state.transfer,
-            mx_RoomTile_hold: this.state.hold,
-            mx_RoomTile_calling: this.state.callState === "ringback",
+            mx_RoomTile_transfer: this.state.callStatus === "transfer",
+            mx_RoomTile_hold: this.state.callStatus === "hold",
+            mx_RoomTile_mute: this.state.callStatus === "mute",
+            mx_RoomTile_dialpad: this.state.callStatus === "dialpad",
+            mx_RoomTile_calling: this.state.callState === "ringback", // THIS DOES NOT TRIGGER STATE CHANGE
             mx_RoomTile_call: this.state.callState === "connected"
         });
+
+        //console.log("*** WHAT IS CLASSES? PACKAGE", classes); //'Classes do not change until subsequent render'
 
         const avatarClasses = classNames({
             mx_RoomTile_avatar: true
@@ -509,6 +571,7 @@ module.exports = createReactClass({
             //console.log("RUNNING SHOW STATUS MESSAGE");
             subtext = this.state.statusMessage;
         }
+        //return <div>SUB TEXT IS {this.state.statusMessage}</div>; // WORKS
 
         let name = this.state.roomName;
         if (name == undefined || name == null) name = "";
@@ -520,8 +583,9 @@ module.exports = createReactClass({
             const limitedCount = FormattingUtils.formatCount(notificationCount);
             const badgeContent = notificationCount ? limitedCount : "!";
             // TODO BADGES KEEP GETTING RENDERED
-            //badge = <div className={badgeClasses}>{badgeContent}</div>;
+            badge = <div className={badgeClasses}>{badgeContent}</div>;
         }
+        //return <div>AFTER BADGES EXIST</div>; // WORKS
 
         let label;
         let subtextLabel;
@@ -554,6 +618,7 @@ module.exports = createReactClass({
                 />
             );
         }
+        //return <div>COLLAPSED PROPS</div>; // WORKS
 
         //var incomingCallBox;
         //if (this.props.incomingCall) {
@@ -572,6 +637,7 @@ module.exports = createReactClass({
                 />
             );
         }
+        //return <div>CONTEXT MENU IS GUEST CHECK</div>; // WORKS
 
         const RoomAvatar = sdk.getComponent("avatars.RoomAvatar");
 
@@ -614,14 +680,78 @@ module.exports = createReactClass({
             //console.log("**** #4 UNREAD MESSAGES ****");
             ariaLabel += " " + _t("Unread messages.");
         }
+        // TODO
+        // Call Status
+        // return <div>BEFORE CALL STATUS CHECK</div>; // WORKS
+        //if (this.state.callStatus) {
+        //console.log("call status changed");
+        //console.log("CURRENT CALL STATE", this.state.callStatus);
+        //}
+        //return <div>BEFORE CALL STATE CHECK</div>; // WORKS
 
         // SEPARATE LOGIC
+        // call state
         if (this.state.callState) {
+            // THIS IS RUN ON EACH RENDER()
             //console.log("\n*************");
             //console.log("#5 THIS IS THE CALL STATE", this.state.callState);
             //console.log("*************\n");
 
             switch (this.state.callState) {
+                case "ringback":
+                    callButtons = (
+                        <div className="hangup" onClick={this.callSession}>
+                            <HangupButton
+                                roomId={this.props.room.roomId}
+                                key="controls_hangup_button"
+                            />
+                        </div>
+                    );
+                    this.setState({
+                        notificationCount: 0
+                    });
+                    // FOLLOWING CAUSES APP TO BREAK
+                    //console.log(
+                    //"*** FORCING UPDATE ON CALL STATE CHANGE TO RINGBACK"
+                    //);
+                    //this.forceUpdate();
+                    break;
+                case "connected":
+                    // TODO
+                    // PROPS SHOULD PASS TO DETERMINE QUICK BUTTON
+                    let type = this.state.mute
+                        ? "mute"
+                        : this.state.hold
+                        ? "hold"
+                        : this.state.transfer
+                        ? "transfer"
+                        : null;
+                    let visible = this.state.mute
+                        ? "quick_button_mute"
+                        : this.state.hold
+                        ? "quick_button_hold"
+                        : this.state.transfer
+                        ? "quick_button_transfer"
+                        : "hide_quick";
+                    // TYPE IS NOT NEEDED FOR SESSION TIMER
+                    callButtons = (
+                        <React.Fragment>
+                            <CallTimer
+                                mute={false}
+                                transfer={false}
+                                hold={false}
+                            />
+                            <QuickButton />
+                            {/*
+                            <QuickButton type={type} className={visible} />
+                            */}
+                        </React.Fragment>
+                    );
+
+                    this.setState({
+                        notificationCount: 0
+                    });
+                    break;
                 case "ended":
                     callButtons = (
                         <div
@@ -641,68 +771,55 @@ module.exports = createReactClass({
                     this.setState({
                         notificationCount: 0
                     });
-                    break;
-                case "ringback":
-                    callButtons = (
-                        <div className="hangup" onClick={this.callSession}>
-                            <HangupButton
-                                roomId={this.props.room.roomId}
-                                key="controls_hangup_button"
-                            />
-                        </div>
-                    );
-                    this.setState({
-                        notificationCount: 0
-                    });
-                    break;
-                case "connected":
-                    // TODO
-                    // PROPS SHOULD PASS TO DETERMINE QUICK BUTTON
-                    let type = this.state.mute
-                        ? "mute"
-                        : this.state.hold
-                        ? "hold"
-                        : this.state.transfer
-                        ? "transfer"
-                        : null;
-                    let visible = this.state.mute
-                        ? "quick_button_mute"
-                        : this.state.hold
-                        ? "quick_button_hold"
-                        : this.state.transfer
-                        ? "quick_button_transfer"
-                        : "hide_quick";
-                    callButtons = (
-                        <React.Fragment>
-                            <CallTimer
-                                mute={false}
-                                transfer={false}
-                                hold={false}
-                            />
-                            <QuickButton type={type} className={visible} />
-                        </React.Fragment>
-                    );
-                    this.setState({
-                        notificationCount: 0
-                    });
-                    break;
-                default:
-                    // XXX remove this after testing
-                    // How willl call timer states be input?
-                    // callButtons = (
-                    // <CallTimer mute={false} transfer={false} hold={false} />
-                    // );
-                    return;
-                //return;
             }
+        } // end of callState check
+        switch (this.state.callStatus) {
+            case "mute":
+                this.setState({
+                    mute: true,
+                    hold: false,
+                    transfer: false,
+                    dialpad: false
+                });
+                break;
+            case "hold":
+                this.setState({
+                    mute: false,
+                    hold: true,
+                    transfer: false,
+                    dialpad: false
+                });
+                break;
+            case "transfer":
+                this.setState({
+                    mute: false,
+                    hold: false,
+                    transfer: true,
+                    dialpad: false
+                });
+                break;
+            case "dialpad":
+                this.setState({
+                    mute: false,
+                    hold: false,
+                    transfer: false,
+                    dialpad: true
+                });
+                break;
+            case "idle":
+                this.setState({
+                    mute: false,
+                    hold: false,
+                    transfer: false,
+                    dialpad: false
+                });
+                break;
+            default:
+            //console.log("<*************>");
+            //console.log("CALL STATUS", this.state.callStatus);
+            //console.log("<*************>");
+            //return; // BREAKS THE FOLLOWING LINES
         }
-
-        // END OF RENDER FUNCTION
-        //console.log("\n----");
-        //console.log("*** THIS IS THE DATA FROM THE ROOM TILE", this.props);
-        //console.log("----\n");
-        //console.log("Need to pass this to room_id in MatrixChat.js");
-
         return (
             <AccessibleButton
                 tabIndex="0"
@@ -738,5 +855,5 @@ module.exports = createReactClass({
                 {tooltip}
             </AccessibleButton>
         );
-    }
+    } //END OF RENDER FUNCTION
 });

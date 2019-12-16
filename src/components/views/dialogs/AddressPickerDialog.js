@@ -43,7 +43,7 @@ const addressTypeName = {
     "mx-user-id": _td("Matrix ID"),
     "mx-room-id": _td("Matrix Room ID"),
     email: _td("email address"),
-    phone: "phone"
+    phone: _td("phone")
 };
 
 module.exports = createReactClass({
@@ -476,7 +476,7 @@ module.exports = createReactClass({
 
     _processResults: function(results, query) {
         const suggestedList = [];
-        console.log("WHAT IS THE RESULTS", results);
+        //console.log("WHAT IS THE RESULTS", results);
         results.forEach(result => {
             if (result.room_id) {
                 const client = MatrixClientPeg.get();
