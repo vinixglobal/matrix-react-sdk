@@ -801,6 +801,8 @@ module.exports = createReactClass({
 
     render: function() {
         const incomingCallIfTaggedAs = tagName => {
+            //console.log("THIS IS THE TAG NAME", tagName);
+
             if (!this.state.incomingCall) return null;
             if (this.state.incomingCallTag !== tagName) return null;
             return this.state.incomingCall;
@@ -830,7 +832,8 @@ module.exports = createReactClass({
             },
             {
                 list: this.state.lists["u.phone"],
-                label: _t("VoIP Calls"),
+                label: _t("Phone Calls"),
+                // IS TAG_NAME GETTER OR SETTER?
                 tagName: "u.phone",
                 order: "recent",
                 incomingCall: incomingCallIfTaggedAs("u.phone"),
@@ -888,7 +891,10 @@ module.exports = createReactClass({
                     //key: "VOIP CALLS",// ALWAYS SETS PHONE AS ROOM NAME
                     key: tagName,
                     label: labelForTagName(tagName),
-                    tagName: tagName,
+                    // CHANGED THIS
+                    tagName: labelForTagName(tagName),
+                    // oRiGiNal
+                    //tagName: tagName,
                     order: "recent",
                     incomingCall: incomingCallIfTaggedAs(tagName)
                 };

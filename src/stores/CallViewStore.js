@@ -62,10 +62,10 @@ class CallViewStore extends Store {
     async _callView(payload) {
         // console.log("WHAT IS IN PAYLOAD?", payload);
         // IF PAYLOAD
-        console.log("PAYLOAD INSIDE OF _CALL VIEW", payload);
+        //console.log("PAYLOAD INSIDE OF _CALL VIEW", payload);
         if (payload.room_id) {
             const newState = {
-                roomId: payload.room_id,
+                //roomId: payload.room_id,
                 // DO I WANT THE OTHER MEMBER IN HERE?
                 roomAlias: payload.room_alias,
                 initialEventId: payload.event_id,
@@ -86,19 +86,19 @@ class CallViewStore extends Store {
         } else if (payload.room_alias) {
             // ROOM ALIAS
             // CHECK IN CACHE
-            let roomId = getCachedRoomIDForAlias(payload.room_alias);
+            //let roomId = getCachedRoomIDForAlias(payload.room_alias);
             // CHECK IN HOMESERVER
-            if (!roomId) {
+            /*if (!roomId) {
                 this._setState({
                     roomId: null,
                     roomAlias: payload.room_alias
                 });
-            }
+            }*/
             // DISPATCH FROM ALIAS CHECK
-            dis.dispatch({
+            /*dis.dispatch({
                 action: "view_room",
                 room_id: roomId
-            });
+            });*/
         }
     }
 

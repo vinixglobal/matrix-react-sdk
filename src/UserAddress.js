@@ -15,15 +15,11 @@ limitations under the License.
 */
 
 const emailRegex = /^\S+@\S+\.\S+$/;
-
 const mxUserIdRegex = /^@\S+:\S+$/;
 const mxRoomIdRegex = /^!\S+:\S+$/;
-
 const mxPhoneRegex = /^\d{10}$/;
-
 import PropTypes from "prop-types";
-export const addressTypes = ["mx-user-id", "mx-room-id", "email"];
-
+export const addressTypes = ["phone", "mx-user-id", "mx-room-id", "email"];
 // PropType definition for an object describing
 // an address that can be invited to a room (which
 // could be a third party identifier or a matrix ID)
@@ -45,7 +41,9 @@ export function getAddressType(inputText) {
     const isUserId = mxUserIdRegex.test(inputText);
     const isRoomId = mxRoomIdRegex.test(inputText);
     const isPhoneNumber = mxPhoneRegex.test(inputText);
-
+    // console.log("****");
+    // console.log("WHAT IS THE INPUT TEXT", inputText);
+    // console.log("****");
     // sanity check the input for user IDs
     if (isEmailAddress) {
         return "email";

@@ -55,7 +55,6 @@ class RoomViewStore extends Store {
     // #1
     constructor() {
         super(dis);
-
         // Initialise state
         this._state = INITIAL_STATE;
     }
@@ -76,13 +75,17 @@ class RoomViewStore extends Store {
             //      - event_offset: 100
             //      - highlighted:  true
             case "view_room":
-                console.log("****");
-                console.log(
+                //console.log("****");
+                /*console.log(
                     "<RoomViewStore> VIEW ROOM ACTION DISPATCHED: DATA =>",
                     payload
-                );
-                console.log("****");
+                );*/
+                //console.log("****");
+                /**************************/
+                // tags should be set here!
+                // TAGS ARE NOT IN THE PAYLOAD
                 this._viewRoom(payload);
+                /**************************/
                 break;
             case "view_my_groups":
             case "view_group":

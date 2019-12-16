@@ -192,7 +192,7 @@ const RoomSubList = createReactClass({
     },
 
     onRoomTileClick(roomId, ev) {
-        //console.log("RUNNING onRoomTileClick method");
+        // console.log("RUNNING onRoomTileClick method");
         // #1 Room tile click
         // Need to check for tag
         // depending on tag dispatch appropriate action
@@ -237,8 +237,8 @@ const RoomSubList = createReactClass({
                 calls={this.props.tagName === "u.phone"}
                 room={room}
                 roomSubList={this}
-                tagName={"CATS"}
-                //tagName={this.props.tagName}
+                tagName={"u.phone"}
+                tagName={this.props.tagName}
                 key={room.roomId}
                 collapsed={this.props.collapsed || false}
                 unread={Unread.doesRoomHaveUnreadMessages(room)}

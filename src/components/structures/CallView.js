@@ -5,26 +5,31 @@ import MatrixClientPeg from "../../MatrixClientPeg";
 
 module.exports = createReactClass({
     displayName: "CallView",
+    /*
     getInitialState: function() {
         return {
-            room: null,
-            roomId: null
+            // room: null
+            // roomId: null
         };
     },
+	*/
     // THIS IS WHERE MEMBERS SHOULD BE RETREIVED FROM
     render: function() {
-        const cli = MatrixClientPeg.get();
+        // const cli = MatrixClientPeg.get();
+        // console.log("WHAT IS THE PROPS?", this.props);
+        // console.log("WHAT IS THE STATE?", this.state);
+        // console.log("++++");
         // TODO
         // need to pass correct roomId to getRoom
-        const room = cli.getRoom(roomId);
-        const { member } = CallViewStore._state;
+        // const room = cli.getRoom(this.props.roomId);
+        // const { member } = CallViewStore._state;
         // THIS WILL SET THE ROOM MEMBERS
-        cli.on("RoomState.members", this.onRoomStateMember);
+        // cli.on("RoomState.members", this.onRoomStateMember);
 
         return (
             <div>
                 <div>Should display the other caller's meta data</div>
-                <h1>Name: {member}</h1>
+                <h1>Name: {"member"}</h1>
                 <p>Company: Vinix</p>
             </div>
         );

@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import React from 'react';
-import GeminiScrollbar from 'react-gemini-scrollbar';
+import React from "react";
+import GeminiScrollbar from "react-gemini-scrollbar";
 
 function GeminiScrollbarWrapper(props) {
-    const {wrappedRef, ...wrappedProps} = props;
+    const { wrappedRef, ...wrappedProps } = props;
+    //console.log("WHAT IS THE WRAPPED REF", wrappedRef);
+    //console.log("WHAT IS THE WRAPPED PROPS", wrappedProps);
 
     // Enable forceGemini so that gemini is always enabled. This is
     // to avoid future issues where a feature is implemented without
@@ -27,9 +29,10 @@ function GeminiScrollbarWrapper(props) {
     // By default GeminiScrollbar allows native scrollbars to be used
     // on macOS. Use forceGemini to enable Gemini's non-native
     // scrollbars on all OSs.
-    return <GeminiScrollbar ref={wrappedRef} forceGemini={true} {...wrappedProps}>
-        { props.children }
-    </GeminiScrollbar>;
+    return (
+        <GeminiScrollbar ref={wrappedRef} forceGemini={true} {...wrappedProps}>
+            {props.children}
+        </GeminiScrollbar>
+    );
 }
 export default GeminiScrollbarWrapper;
-
