@@ -66,7 +66,18 @@ module.exports = createReactClass({
         this._unmounted = true;
     },
 
+    // TODO
+    //RoomListActions.tagRoom(1,2,3,4,5,6)
     _toggleTag: function(tagNameOn, tagNameOff) {
+        //console.log("---------------");
+        //console.log("TAG NAME ON", tagNameOn); // m.favourite
+        //console.log("TAG NAME OFF", tagNameOff); // undefined
+        //console.log("---------------");
+        /*console.log(
+            "DATA PASSED TO TAG ROOM FUNCTION #1: ",
+            MatrixClientPeg.get() / baseUrl // roomList, baseUrl, credentials, META_DATA
+        );
+        console.log("DATA PASSED TO TAG ROOM FUNCTION #2: ", this.props.room); // room, tags: order*/
         if (!MatrixClientPeg.get().isGuest()) {
             Promise.delay(500).then(() => {
                 dis.dispatch(
@@ -92,6 +103,7 @@ module.exports = createReactClass({
                 isFavourite: true,
                 isLowPriority: false
             });
+            // favourite: on, lowpriority: off
             this._toggleTag("m.favourite", "m.lowpriority");
         } else if (this.state.isFavourite) {
             this.setState({ isFavourite: false });

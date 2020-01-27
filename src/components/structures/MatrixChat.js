@@ -108,6 +108,7 @@ const VIEWS = {
 // Actions that are redirected through the onboarding process prior to being
 // re-dispatched. NOTE: some actions are non-trivial and would require
 // re-factoring to be included in this list in future.
+// TODO
 const ONBOARDING_FLOW_STARTERS = [
     "view_user_settings",
     "view_create_chat",
@@ -1062,6 +1063,8 @@ export default createReactClass({
     // TODO not transferring to correct roomId
     // Need to get the room's id
     _callView: function(roomInfo) {
+        // ONLY RUNS ON CLICK
+        console.log("_CALL VIEW METHOD RUN *********************");
         //console.log("CALL VIEW METHOD");
         //console.log("WHAT IS THE PAYLOAD", roomInfo);
         this.focusComposer = true;
@@ -1075,17 +1078,21 @@ export default createReactClass({
             roomOobData: roomInfo.oob_data,
             viaServers: roomInfo.via_servers
         };
+        // should the state contain the phone tags? -- probably not???
 
         // TODO need to check if room has a u.phone tag!!!
         if (roomInfo.room_alias) {
+            // NOT RUNNING
             console.log(
-                `Switching to room alias ${roomInfo.room_alias} at event ` +
-                    roomInfo.event_id
+                `CALL VIEW -- Switching to room alias ${
+                    roomInfo.room_alias
+                } at event ` + roomInfo.event_id
             );
         } else {
             console.log(
-                `Switching to room id ${roomInfo.room_id} at event ` +
-                    roomInfo.event_id
+                `CALL VIEW -- Switching to room id ${
+                    roomInfo.room_id
+                } at event ` + roomInfo.event_id
             );
         }
 
@@ -1106,6 +1113,8 @@ export default createReactClass({
         waitFor.done(() => {
             let presentedId = roomInfo.room_alias || roomInfo.room_id;
             const room = MatrixClientPeg.get().getRoom(roomInfo.room_id);
+            // NEED TO FIGURE OUT TAG PROBLEM
+            console.log("WHAT DATA IS IN ROOM", room);
 
             if (room) {
                 const theAlias = Rooms.getDisplayAliasForRoom(room);
@@ -1218,6 +1227,7 @@ export default createReactClass({
     },
 
     _createRoom: async function() {
+        // THIS NEVER RUNS
         const CreateRoomDialog = sdk.getComponent("dialogs.CreateRoomDialog");
         const modal = Modal.createTrackedDialog(
             "Create Room",
@@ -1226,12 +1236,17 @@ export default createReactClass({
         );
 
         const [shouldCreate, createOpts] = await modal.finished;
+        //console.log("****");
+        //console.log("WHAT IS SHOULD CREATE", shouldCreate);
+        //console.log("WHAT IS CREATE OPTS", createOpts);
+        //console.log("****");
         if (shouldCreate) {
             createRoom({ createOpts }).done();
         }
     },
 
     _chatCreateOrReuse: function(userId) {
+        console.log("**** CREATE NEW CHAT OR REUSE <LINE 1240>");
         // Use a deferred action to reshow the dialog once the user has registered
         if (MatrixClientPeg.get().isGuest()) {
             // No point in making 2 DMs with welcome bot. This assumes view_set_mxid will

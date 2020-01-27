@@ -163,6 +163,7 @@ class RoomViewStore extends Store {
     } // END OF DISPATCH
 
     _viewRoom(payload) {
+        // condition 1 check for room_id
         if (payload.room_id) {
             const newState = {
                 roomId: payload.room_id,
@@ -192,6 +193,8 @@ class RoomViewStore extends Store {
                 newState.replyingToEvent = payload.replyingToEvent;
             }
             if (this._state.forwardingEvent) {
+                console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>");
+                console.log("DISPATCHING THE SEND_EVENT");
                 dis.dispatch({
                     action: "send_event",
                     room_id: newState.roomId,
@@ -204,6 +207,7 @@ class RoomViewStore extends Store {
             if (payload.auto_join) {
                 this._joinRoom(payload);
             }
+            // condition 2 - check room for alias
         } else if (payload.room_alias) {
             // Resolve the alias and then do a second dispatch with the room ID acquired
             this._setState({
@@ -239,7 +243,7 @@ class RoomViewStore extends Store {
                     }
                 );
         }
-    }
+    } // end of function
 
     _viewRoomError(payload) {
         this._setState({

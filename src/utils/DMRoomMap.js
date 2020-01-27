@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import MatrixClientPeg from '../MatrixClientPeg';
-import _uniq from 'lodash/uniq';
+import MatrixClientPeg from "../MatrixClientPeg";
+import _uniq from "lodash/uniq";
 
 /**
  * Class that takes a Matrix Client and flips the m.direct map
@@ -36,7 +36,7 @@ export default class DMRoomMap {
         // (use a static property arrow function for this when we can)
         this._onAccountData = this._onAccountData.bind(this);
 
-        const mDirectEvent = matrixClient.getAccountData('m.direct');
+        const mDirectEvent = matrixClient.getAccountData("m.direct");
         this.mDirectEvent = mDirectEvent ? mDirectEvent.getContent() : {};
         this.userToRooms = null;
     }
@@ -69,8 +69,9 @@ export default class DMRoomMap {
     }
 
     _onAccountData(ev) {
-        if (ev.getType() == 'm.direct') {
-            this.mDirectEvent = this.matrixClient.getAccountData('m.direct').getContent() || {};
+        if (ev.getType() == "m.direct") {
+            this.mDirectEvent =
+                this.matrixClient.getAccountData("m.direct").getContent() || {};
             this.userToRooms = null;
             this.roomToUser = null;
         }
@@ -85,25 +86,28 @@ export default class DMRoomMap {
         const selfRoomIds = userToRooms[myUserId];
         if (selfRoomIds) {
             // any self-chats that should not be self-chats?
-            const guessedUserIdsThatChanged = selfRoomIds.map((roomId) => {
-                const room = this.matrixClient.getRoom(roomId);
-                if (room) {
-                    const userId = room.guessDMUserId();
-                    if (userId && userId !== myUserId) {
-                        return {userId, roomId};
+            const guessedUserIdsThatChanged = selfRoomIds
+                .map(roomId => {
+                    const room = this.matrixClient.getRoom(roomId);
+                    if (room) {
+                        const userId = room.guessDMUserId();
+                        if (userId && userId !== myUserId) {
+                            return { userId, roomId };
+                        }
                     }
-                }
-            }).filter((ids) => !!ids); //filter out
+                })
+                .filter(ids => !!ids); //filter out
             // these are actually all legit self-chats
             // bail out
             if (!guessedUserIdsThatChanged.length) {
                 return false;
             }
-            userToRooms[myUserId] = selfRoomIds.filter((roomId) => {
-                return !guessedUserIdsThatChanged
-                    .some((ids) => ids.roomId === roomId);
+            userToRooms[myUserId] = selfRoomIds.filter(roomId => {
+                return !guessedUserIdsThatChanged.some(
+                    ids => ids.roomId === roomId
+                );
             });
-            guessedUserIdsThatChanged.forEach(({userId, roomId}) => {
+            guessedUserIdsThatChanged.forEach(({ userId, roomId }) => {
                 const roomIds = userToRooms[userId];
                 if (!roomIds) {
                     userToRooms[userId] = [roomId];
@@ -149,16 +153,24 @@ export default class DMRoomMap {
             const userToRooms = this.mDirectEvent;
             const myUserId = this.matrixClient.getUserId();
             const selfDMs = userToRooms[myUserId];
+            // ROOMS WITH ONLY ONE USER
             if (selfDMs && selfDMs.length) {
+                //console.log("WHAT IS SELF DMs?", selfDMs);
+                //console.log("WHAT IS SELF DMs?", selfDMs.length);
                 const neededPatching = this._patchUpSelfDMs(userToRooms);
                 // to avoid multiple devices fighting to correct
                 // the account data, only try to send the corrected
                 // version once.
-                console.warn(`Invalid m.direct account data detected ` +
-                    `(self-chats that shouldn't be), patching it up.`);
-                if (neededPatching && !this._hasSentOutPatchDirectAccountDataPatch) {
+                /*console.warn(
+                    `Invalid m.direct account data detected ` +
+                        `(self-chats that shouldn't be), patching it up.`
+                );*/
+                if (
+                    neededPatching &&
+                    !this._hasSentOutPatchDirectAccountDataPatch
+                ) {
                     this._hasSentOutPatchDirectAccountDataPatch = true;
-                    this.matrixClient.setAccountData('m.direct', userToRooms);
+                    this.matrixClient.setAccountData("m.direct", userToRooms);
                 }
             }
             this.userToRooms = userToRooms;

@@ -57,7 +57,7 @@ const RoomSubList = createReactClass({
         collapsed: PropTypes.bool.isRequired, // is LeftPanel collapsed?
         onHeaderClick: PropTypes.func,
         incomingCall: PropTypes.object,
-        extraTiles: PropTypes.arrayOf(PropTypes.node), // extra elements added beneath tiles
+        //extraTiles: PropTypes.arrayOf(PropTypes.node), // extra elements added beneath tiles
         forceExpand: PropTypes.bool
     },
 
@@ -283,6 +283,8 @@ const RoomSubList = createReactClass({
                 room_id: this.props.list[0].roomId
             });
         } else if (this.props.extraTiles && this.props.extraTiles.length > 0) {
+            console.log("WHAT ARE THE EXTRA TILES", this.props.extraTiles);
+            console.log("*************** EXTRA TILE CHECK <roomSubList 287>");
             // Group Invites are different in that they are all extra tiles and not rooms
             // XXX: this is a horrible special case because Group Invite sublist is a hack
             if (
@@ -296,10 +298,14 @@ const RoomSubList = createReactClass({
             }
         }
     },
-
+    // #2 - method of class RoomSubList
     onAddRoom: function(e) {
         e.stopPropagation();
         if (this.props.onAddRoom) this.props.onAddRoom();
+        // console.log("***");
+        // console.log("WHAT IS THE PROPS OF ON ADD ROOM", this.props);
+        // IS THIS THE SAME (RoomSubList.onAddRoom - this.props.onAddRoom)
+        // console.log("***");
     },
 
     _getHeaderJsx: function(isCollapsed) {
@@ -371,7 +377,10 @@ const RoomSubList = createReactClass({
         }
 
         let addRoomButton;
+        // #1
         if (this.props.onAddRoom) {
+            // ALL ADD ROOMS HAVE THIS
+            // WHAT DIFFERENTIATES THESE?
             addRoomButton = (
                 <AccessibleTooltipButton
                     onClick={this.onAddRoom}

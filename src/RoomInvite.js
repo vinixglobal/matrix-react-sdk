@@ -25,6 +25,7 @@ import sdk from "./";
 import dis from "./dispatcher";
 import DMRoomMap from "./utils/DMRoomMap";
 import { _t } from "./languageHandler";
+import RoomListActions from "./actions/RoomListActions";
 
 /**
  * Invites multiple addresses to a room
@@ -140,8 +141,9 @@ export function isValid3pidInvite(event) {
     // Valid enough by our standards
     return true;
 }
+
+// HOW DOES THE START DM FINISHED AT TAGS, DOES IT ADD TAGS?
 function _onStartCallFinished(shouldInvite, addrs) {
-    // TODO PRIORITY
     // THIS IS THE END FUNCTION OF PHONE CALL
     // TAGS SHOULD BE SET HERE FOR U.PHONE
     if (!shouldInvite) return;
@@ -153,43 +155,26 @@ function _onStartCallFinished(shouldInvite, addrs) {
 
     // THIS DOESN'T MATTER IT
     // PHONE CALLS ARE ALWAYS BRAND NEW
-    if (_isDmChat(addrTexts)) {
-        console.log("DM CHAT IS RUNNING!!! <line 155>");
-        //console.log("WHAT IS ADDRESS TEXTS", addrTexts);
-        const rooms = _getDirectMessageRooms(addrTexts[0]);
-
-        if (rooms.length > 0) {
-            // A Direct Message room already exists for this user, so reuse it
-            dis.dispatch({
-                action: "view_room",
-                room_id: rooms[0],
-                should_peek: false,
-                joining: false
-            });
-        } else {
-            // Start a new DM chat
-            createRoom({ dmUserId: addrTexts[0] }).catch(err => {
-                const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
-                Modal.createTrackedDialog(
-                    "Failed to start chat",
-                    "",
-                    ErrorDialog,
-                    {
-                        title: _t("Failed to start chat"),
-                        description:
-                            err && err.message
-                                ? err.message
-                                : _t("Operation failed")
-                    }
-                );
-            });
-        }
-    } else if (addrTexts.length === 1) {
-        console.log("STARTING NEW PHONE CALL ROOM");
+    if (addrTexts.length === 1) {
+        // console.log("STARTING NEW PHONE CALL ROOM");
         // Start a new DM chat
         // THIS IS WHERE TAGS SHOULD BE SET
-        createRoom({ dmUserId: addrTexts[0] }).catch(err => {
+        // console.log("****");
+        // console.log("ADDRESS TEXTS ARRAY: ", addrTexts[0]); // PHONE NUMBER
+        // console.log("****");
+        // WHAT DOES CREATE ROOM DO?
+        /***** 1st Action *******/
+        console.log("/******** 1st **********/");
+        console.log("RUN AFTER THE MODAL IS CLOSED");
+        // THIS IS WHERE THE TAGS SHOULD BE SET
+        // TODO
+        // NEED TO PASS THE ROOM
+        // console.log("THIS PROPS.ROOM", this.props.room); // ROOMS ARE CREATED AFTER CREATE ROOM FUNCTION
+        // console.log("ROOMS ARE RETURNING NULL");
+        // IS CREATE ROOM WHERE THE TAGS SHOULD BE SET??????
+        createRoom({ dmUserId: addrTexts[0], phone: true }).catch(err => {
             const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+            console.log("THIS IS THE ADDRESS: ========>", addr.address);
             // DOESN'T NEED ERROR CHECKING
             Modal.createTrackedDialog("Failed to start chat", "", ErrorDialog, {
                 title: _t("Failed to start chat"),
@@ -197,39 +182,29 @@ function _onStartCallFinished(shouldInvite, addrs) {
                     err && err.message ? err.message : _t("Operation failed")
             });
         });
-    } else {
-        // THIS WOULD BE USEFUL FOR CONFERENCE CALLS
-        // Start multi user chat
-        /*
-        let room;
-        createRoom()
-            .then(roomId => {
-                room = MatrixClientPeg.get().getRoom(roomId);
-                return inviteMultipleToRoom(roomId, addrTexts);
-            })
-            .then(result => {
-                return _showAnyInviteErrors(
-                    result.states,
-                    room,
-                    result.inviter
-                );
-            })
-            .catch(err => {
-                console.error(err.stack);
-                const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
-                Modal.createTrackedDialog("Failed to invite", "", ErrorDialog, {
-                    title: _t("Failed to invite"),
-                    description:
-                        err && err.message
-                            ? err.message
-                            : _t("Operation failed")
-                });
-            });
-			*/
+
+        // NOT CORRECT ROOM
+        console.log("IS THIS THE ROOM?", addrTexts[0]);
+        // old tag
+        // new tag
+        // old index
+        // new index
+        RoomListActions.tagRoom(
+            MatrixClientPeg.get(),
+            // test
+            // "!RriiTnqelYDNrkXXXQ:teematrix.vinixtech.net",
+            // addrTexts[0], // no props
+            undefined,
+            "u.phone",
+            undefined,
+            0
+        );
+        //const accountData = MatrixClientPeg.get().getAccountData("u.phone");// undefined
+        const accountData = MatrixClientPeg.get().getAccountData("m.direct"); // undefined
+        console.log("WHAT DATA IS INSIDE ACCOUNT_DATA(M.DIRECT)", accountData);
     }
 }
 
-// TODO: Immutable DMs replaces this
 function _onStartDmFinished(shouldInvite, addrs) {
     if (!shouldInvite) return;
 
@@ -261,7 +236,7 @@ function _onStartDmFinished(shouldInvite, addrs) {
                                 : _t("Operation failed")
                     }
                 );
-            });
+            }); // END OF CATCH
         }
     } else if (addrTexts.length === 1) {
         // Start a new DM chat
@@ -304,6 +279,9 @@ function _onStartDmFinished(shouldInvite, addrs) {
 
 function _onRoomInviteFinished(roomId, shouldInvite, addrs) {
     if (!shouldInvite) return;
+    console.log("****");
+    console.log("ON ROOM INVITE FINISHED <line 275>");
+    console.log("****");
 
     const addrTexts = addrs.map(addr => addr.address);
 
@@ -326,13 +304,16 @@ function _onRoomInviteFinished(roomId, shouldInvite, addrs) {
 
 // TODO: Immutable DMs replaces this
 function _isDmChat(addrTexts) {
-    console.log("RUNNING DM CHAT CHECK", _isDmChat);
     if (
         addrTexts.length === 1 &&
         getAddressType(addrTexts[0]) === "mx-user-id"
     ) {
+        console.log("CHAT IS TO MX-USER-ID");
+        console.log("RETURNING TRUE");
         return true;
     } else {
+        console.log("CHAT IS NOT TO MX-USER-ID");
+        console.log("RETURNING FALSE");
         return false;
     }
 }

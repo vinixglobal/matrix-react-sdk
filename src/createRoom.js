@@ -35,10 +35,8 @@ import { getAddressType } from "./UserAddress";
  * @returns {Promise} which resolves to the room id, or null if the
  * action was aborted or failed.
  */
-function createRoom(opts) {
-    // console.log("|||||||||||||||||||");
-    // console.log("THIS IS THE ARGUMENT PASSED TO CREATE ROOM", opts);
-    // console.log("|||||||||||||||||||");
+function createRoom(opts, phone = false) {
+    // console.log("THIS IS THE ARGUMENT PASSED TO CREATE ROOM", opts); // dmUserId: ${1234512345}
     opts = opts || {};
     if (opts.spinner === undefined) opts.spinner = true;
 
@@ -47,7 +45,7 @@ function createRoom(opts) {
 
     const client = MatrixClientPeg.get();
     const domain = client.baseUrl.split("/").pop();
-    //console.log("WHAT IS DOMAIN?", domain);
+    // console.log("WHAT IS DOMAIN?", domain);
     if (client.isGuest()) {
         dis.dispatch({ action: "require_registration" });
         return Promise.resolve(null);
@@ -63,12 +61,14 @@ function createRoom(opts) {
     createOpts.visibility = createOpts.visibility || "private";
 
     if (opts.dmUserId && createOpts.invite === undefined) {
-        const phoneCheck = /^\d{10}$/;
-        if (phoneCheck.test(opts.dmUserId)) {
-            opts.dmUserId = `@sip_${opts.dmUserId}:${domain}`;
-        }
+        //const phoneCheck = /^\d{10}$/;
+        // IF PHONE
+        //if (phoneCheck.test(opts.dmUserId)) {
+        //opts.dmUserId = `@sip_${opts.dmUserId}:${domain}`;
+        //}
         //console.log("OPTS DM USER ID ==============>", opts.dmUserId);
         //console.log("Create Opts Visibility =======>", createOpts.invite);
+        //getAddressType(1234512345);
         switch (getAddressType(opts.dmUserId)) {
             case "mx-user-id":
                 createOpts.invite = [opts.dmUserId];
@@ -87,11 +87,25 @@ function createRoom(opts) {
                         address: opts.dmUserId
                     }
                 ];
-            //break;
+                break;
+            case "phone":
+                //console.log( //preset: 'trusted_private_chat', visibility: 'private'
+                //"WHAT OPTIONS ARE PASSED TO THE CREATE OPTS KEY",
+                //createOpts
+                //);
+                console.log("/******* 2nd ***********/");
+                opts.dmUserId = `@sip_${opts.dmUserId}:${domain}`;
+                // CREATE OPTS INVITE NEEDED else EMPTY ROOM IS CREATED
+                createOpts.invite = [opts.dmUserId];
+                break;
         }
-    }
+    } // END OF INVITE
+
     if (opts.dmUserId && createOpts.is_direct === undefined) {
-        createOpts.is_direct = true;
+        createOpts.is_direct = true; // DEFAULT IS TRUE
+        //createOpts.is_direct = false; // DOESN'T MATTER
+        //console.log("THIS WILL ALWAYS SET THE KEY IS_DIRECT TO TRUE ALWAYS");
+        //console.log("SHOULD THIS BE DIFFERENT", createOpts);
     }
 
     // By default, view the room after creating it
@@ -117,14 +131,22 @@ function createRoom(opts) {
         modal = Modal.createDialog(Loader, null, "mx_Dialog_spinner");
 
     let roomId;
+    // IS THIS WHERE TAGS ARE SET?
+    console.log(
+        "<<<<<<<<<<<<<< CREATE OPTS IS THE DATA USED TO CREATE ROOM",
+        createOpts
+    );
     return client
-        .createRoom(createOpts)
+        .createRoom(createOpts) // Creates rooms using ????? data:
         .finally(function() {
             if (modal) modal.close();
         })
         .then(function(res) {
             roomId = res.room_id;
             if (opts.dmUserId) {
+                // IS THIS WHERE TAGS ARE SET?
+                // WHAT DOES THIS DO?
+                // DOESN'T RUN WHEN CREATING NEW CHAT
                 return Rooms.setDMRoom(roomId, opts.dmUserId);
             } else {
                 return Promise.resolve();
@@ -136,7 +158,12 @@ function createRoom(opts) {
                 // room has been created, so we race here with the client knowing that
                 // the room exists, causing things like
                 // https://github.com/vector-im/vector-web/issues/1813
+                //debugger;
                 if (opts.andView) {
+                    // console.log("WHAT IS OPTS.andView", opts.andView); // BOOLEAN
+                    // console.log("/********** 4th ***********/");
+                    // console.log("OPTS AND VIEW METHOD RUN");
+                    // console.log("DISPATCHING VIEW ROOM");
                     dis.dispatch({
                         action: "view_room",
                         room_id: roomId,
@@ -144,11 +171,18 @@ function createRoom(opts) {
                         // Creating a room will have joined us to the room,
                         // so we are expecting the room to come down the sync
                         // stream, if it hasn't already.
-                        joining: true
+                        joining: true,
+                        // CUSTOM KEY TO DETERMINE IF PHONE CALL
+                        phone
                     });
                 }
+                // debugger;
+                // does room get created here? YES - gets placed in ROOMS list
+                // console.log(">>>>>>>>> FINISHED <<<<<<<<<<<<", roomId);
+                // goes to MatrixChat line 1016
                 return roomId;
             },
+            // ERROR HANDLING
             function(err) {
                 // We also failed to join the room (this sets joining to false in RoomViewStore)
                 dis.dispatch({
@@ -178,6 +212,6 @@ function createRoom(opts) {
                 return null;
             }
         );
-}
+} // END OF CREATE ROOM FUNCTION
 
 module.exports = createRoom;
