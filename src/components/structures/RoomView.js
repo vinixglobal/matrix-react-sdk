@@ -277,6 +277,11 @@ module.exports = createReactClass({
 
         // NB: This does assume that the roomID will not change for the lifetime of
         // the RoomView instance
+        //console.log("WILL THIS SET THE NEW ROOM TO A NEW SUBLIST");
+        console.log("* BEFORE DEBUGGER *");
+        debugger;
+        console.log("** AFTER DEBUGGER");
+        //debugger;
         if (initial) {
             newState.room = MatrixClientPeg.get().getRoom(newState.roomId);
             if (newState.room) {
@@ -380,6 +385,15 @@ module.exports = createReactClass({
         // about it). We don't peek in the historical case where we were joined but are
         // now not joined because the js-sdk peeking API will clobber our historical room,
         // making it impossible to indicate a newly joined room.
+
+        /* DOES NOT RUN
+        console.log("ROOM_VIEW");
+        console.log("ROOM:", room);
+        console.log("ROOM_ID:", roomId);
+        console.log("JOINING:", joining);
+        console.log("SHOULD PEEK:", shouldPeek);
+		*/
+
         if (!joining && roomId) {
             if (this.props.autoJoin) {
                 this.onJoinButtonClicked();
@@ -917,8 +931,10 @@ module.exports = createReactClass({
         const room = this.state.room;
         if (!room) return;
 
-        console.log("Tinter.tint from updateTint");
         const colorScheme = SettingsStore.getValue("roomColor", room.roomId);
+        //console.log("COSMETIC ONLY");
+        console.log("/******* 6th *********/ cosmetic only");
+        //debugger;
         Tinter.tint(colorScheme.primary_color, colorScheme.secondary_color);
     },
 

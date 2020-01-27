@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import MatrixClientPeg from './MatrixClientPeg';
-import Promise from 'bluebird';
+import MatrixClientPeg from "./MatrixClientPeg";
+import Promise from "bluebird";
 
 /**
  * Given a room object, return the alias we should use for it,
@@ -81,15 +81,22 @@ export function isConfCallRoom(room, myUserId, conferenceHandler) {
 
 export function looksLikeDirectMessageRoom(room, myUserId) {
     const myMembership = room.getMyMembership();
+    // DOESN'T RUN
+    console.log("**** WHAT IS MY MEMBERSHIP <rooms.js line 84>", myMembership);
     const me = room.getMember(myUserId);
 
-    if (myMembership == "join" || myMembership === "ban" || (me && me.isKicked())) {
+    if (
+        myMembership == "join" ||
+        myMembership === "ban" ||
+        (me && me.isKicked())
+    ) {
         // Used to split rooms via tags
         const tagNames = Object.keys(room.tags);
         // Used for 1:1 direct chats
         // Show 1:1 chats in seperate "Direct Messages" section as long as they haven't
         // been moved to a different tag section
-        const totalMemberCount = room.currentState.getJoinedMemberCount() +
+        const totalMemberCount =
+            room.currentState.getJoinedMemberCount() +
             room.currentState.getInvitedMemberCount();
         if (totalMemberCount === 2 && !tagNames.length) {
             return true;
@@ -102,7 +109,8 @@ export function guessAndSetDMRoom(room, isDirect) {
     let newTarget;
     if (isDirect) {
         const guessedUserId = guessDMRoomTargetId(
-            room, MatrixClientPeg.get().getUserId(),
+            room,
+            MatrixClientPeg.get().getUserId()
         );
         newTarget = guessedUserId;
     } else {
@@ -125,7 +133,9 @@ export function setDMRoom(roomId, userId) {
         return Promise.resolve();
     }
 
-    const mDirectEvent = MatrixClientPeg.get().getAccountData('m.direct');
+    // CURRENT TODO
+    // WHAT DOES GETACCOUNTDATA(M.DIRECT DO)?
+    const mDirectEvent = MatrixClientPeg.get().getAccountData("m.direct");
     let dmRoomMap = {};
 
     if (mDirectEvent !== undefined) dmRoomMap = mDirectEvent.getContent();
@@ -152,8 +162,15 @@ export function setDMRoom(roomId, userId) {
         dmRoomMap[userId] = roomList;
     }
 
-
-    return MatrixClientPeg.get().setAccountData('m.direct', dmRoomMap);
+    //console.log("src/Rooms.js <line 155>");
+    //console.log("WHAT IS 2nd ARG OF SET ACCOUNT DATA", dmRoomMap);
+    // DM ROOM MAP IS OBJECT OF USER ID AND ARRAY OF ALL ROOMS EVER CREATED WITH THAT USER
+    console.log("/********* 3rd ***********/");
+    console.log("WHAT IS THE DM ROOM MAP", dmRoomMap);
+    // GETTING THE DATA THEN SETTING THE DIRECT TAG
+    //let result = MatrixClientPeg.get().setAccountData("m.direct", dmRoomMap);
+    return MatrixClientPeg.get().setAccountData("u.phone", dmRoomMap);
+    //return MatrixClientPeg.get().setAccountData("m.direct", dmRoomMap); // DEFAULT
 }
 
 /**
@@ -172,7 +189,10 @@ function guessDMRoomTargetId(room, myUserId) {
     for (const user of room.getJoinedMembers()) {
         if (user.userId == myUserId) continue;
 
-        if (oldestTs === undefined || (user.events.member && user.events.member.getTs() < oldestTs)) {
+        if (
+            oldestTs === undefined ||
+            (user.events.member && user.events.member.getTs() < oldestTs)
+        ) {
             oldestUser = user;
             oldestTs = user.events.member.getTs();
         }
@@ -183,7 +203,10 @@ function guessDMRoomTargetId(room, myUserId) {
     for (const user of room.currentState.getMembers()) {
         if (user.userId == myUserId) continue;
 
-        if (oldestTs === undefined || (user.events.member && user.events.member.getTs() < oldestTs)) {
+        if (
+            oldestTs === undefined ||
+            (user.events.member && user.events.member.getTs() < oldestTs)
+        ) {
             oldestUser = user;
             oldestTs = user.events.member.getTs();
         }

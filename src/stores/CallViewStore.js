@@ -1,9 +1,9 @@
 import dis from "../dispatcher";
 import { Store } from "flux/utils";
 // CONNECTION TO matrix-js-sdk
-import MatrixClientPeg from "../MatrixClientPeg";
-import sdk from "../index";
-import Modal from "../Modal";
+//import MatrixClientPeg from "../MatrixClientPeg";
+//import sdk from "../index";
+//import Modal from "../Modal";
 import { _t } from "../languageHandler";
 import { getCachedRoomIDForAlias } from "../RoomAliasCache";
 
@@ -27,9 +27,12 @@ class CallViewStore extends Store {
     async __onDispatch(payload) {
         //console.log("NEED TO GET OTHER MEMBER OF ROOM", payload.room);
         //console.log("Payload.action", payload.action);
+        //const { accessToken } = MatrixClientPeg._currentClientCreds;
+        let members;
+        let me;
+        //let member;
         switch (payload.action) {
             case "call_view":
-                const { accessToken } = MatrixClientPeg._currentClientCreds;
                 //console.log("====================");
                 //console.log("payload", payload);
                 /*console.log(
@@ -42,14 +45,13 @@ class CallViewStore extends Store {
             case "MatrixActions.Room": // BAD DESIGN - calls a search on entire list of user's room
                 //console.log("Matrix Action.Room ++++++++++++");
                 //console.log("SETTING MEMBER FROM GET ROOM", payload.room);
-                //const members = await payload.room.currentState.members;
-                //const me = payload.room.myUserId;
-                //let otherMember;
-                //if (!(me in members)) {
-                //otherMember = Object.keys(members)[0];
-                //console.log("OTHER MEMBER IS THIS!!!!", otherMember);
-                //this._setState({ member: "NOT ME" });
-                //}
+                members = await payload.room.currentState.members;
+                me = payload.room.myUserId;
+                if (!(me in members)) {
+                    //const otherMember = Object.keys(members)[0];
+                    //console.log("OTHER MEMBER IS THIS!!!!", otherMember);
+                    this._setState({ member: "NOT ME" });
+                }
                 //console.log("MEMBERS ARE : ==> ", await members);
                 //console.log("I AM ==> ", me);
                 //const member = members.filter(user => user !== me);
@@ -63,6 +65,7 @@ class CallViewStore extends Store {
         // console.log("WHAT IS IN PAYLOAD?", payload);
         // IF PAYLOAD
         //console.log("PAYLOAD INSIDE OF _CALL VIEW", payload);
+        let roomId;
         if (payload.room_id) {
             const newState = {
                 //roomId: payload.room_id,
@@ -86,19 +89,19 @@ class CallViewStore extends Store {
         } else if (payload.room_alias) {
             // ROOM ALIAS
             // CHECK IN CACHE
-            //let roomId = getCachedRoomIDForAlias(payload.room_alias);
+            roomId = getCachedRoomIDForAlias(payload.room_alias);
             // CHECK IN HOMESERVER
-            /*if (!roomId) {
+            if (!roomId) {
                 this._setState({
                     roomId: null,
                     roomAlias: payload.room_alias
                 });
-            }*/
+            }
             // DISPATCH FROM ALIAS CHECK
-            /*dis.dispatch({
+            dis.dispatch({
                 action: "view_room",
                 room_id: roomId
-            });*/
+            });
         }
     }
 
@@ -107,7 +110,7 @@ class CallViewStore extends Store {
     }
 
     //_viewRoomError(payload) // SHOULD THIS BE ADDED?
-}
+} // END OF THE CLASS CALL VIEW STORE
 
 let singletonCallViewStore = null;
 

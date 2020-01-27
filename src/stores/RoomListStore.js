@@ -45,8 +45,8 @@ const CATEGORY_ORDER = [
 const LIST_ORDERS = {
     "m.favourite": "manual",
     "im.vector.fake.invite": "recent",
-    "u.phone": "importance",
-    "u.doors": "importance",
+    "u.phone": "recent",
+    "u.doors": "recent",
     "im.vector.fake.recent": "recent",
     "im.vector.fake.direct": "recent",
     "m.lowpriority": "recent",
@@ -185,6 +185,10 @@ class RoomListStore extends Store {
                             "feature_custom_tags"
                         )
                     });
+                    console.log(
+                        "WHAT ARE FEATURE CUSTOM TAGS?",
+                        SettingsStore.isFeatureEnabled
+                    );
 
                     this._matrixClient = payload.matrixClient;
 
@@ -221,6 +225,7 @@ class RoomListStore extends Store {
                     if (!logicallyReady) break;
                     // TODO: Figure out which rooms changed in the tag and only change those.
                     // This is very blunt and wipes out the sticky room stuff
+                    //console.log("** ACTION IS MATRIX ACTIONS ROOM TAGS **");
                     this._generateInitialRoomLists();
                 }
                 break;
@@ -267,7 +272,6 @@ class RoomListStore extends Store {
                     ) {
                         break;
                     }
-
                     this._roomUpdateTriggered(roomId);
                 }
                 break;
@@ -362,13 +366,20 @@ class RoomListStore extends Store {
     }
 
     _getRecommendedTagsForRoom(room) {
+        // THIS WILL ADD THE TAG TO ALL NEW ROOMS
         const tags = [];
 
         const myMembership = room.getMyMembership();
         if (myMembership === "join" || myMembership === "invite") {
             // Stack the user's tags on top
             tags.push(...this._filterTags(room.tags));
-
+            //console.log("----");
+            //console.log("TAGS", room);
+            //console.log("----");
+            if (room.name.split("_")[0] === "@sip") {
+                console.log("****** TAGS PUSHED AS PHONE");
+                tags.push("u.phone");
+            }
             // Order matters here: The DMRoomMap updates before invites
             // are accepted, so we check to see if the room is an invite
             // first, then if it is a direct chat, and finally default
@@ -382,15 +393,20 @@ class RoomListStore extends Store {
             ) {
                 // We intentionally don't duplicate rooms in other tags into the people list
                 // as a feature.
+                //console.log("DIRECT CHAT");
+                //console.log(">>>>>>>>>>>>>>>>>>>>>");
+                //console.log("**** PUSHING TAG AS DIRECT CHAT");
+                //console.log(">>>>>>>>>>>>>>>>>>>>>");
                 tags.push("im.vector.fake.direct");
             } else if (tags.length === 0) {
+                //console.log("**** PUSHING TAG AS RECENT");
                 tags.push("im.vector.fake.recent");
             }
         } else if (myMembership) {
             // null-guard as null means it was peeked
             tags.push("im.vector.fake.archived");
         }
-
+        //console.log("THIS IS ALL THE TAGS ARRAY: ", tags); //DIFFERENT FOR EACH CALL 1st im.vector.fake.recent 2nd u.door
         return tags;
     }
 
@@ -613,6 +629,9 @@ class RoomListStore extends Store {
         // There should never be a discrepancy.
         for (const targetTag of targetTags) {
             let count = 0;
+            //console.log("KEYS TARGET TAG IS: ", targetTag);
+            //console.log("OBJECT TARGET TAGS IS: ", targetTags);
+            //console.log("----------------------");
             for (const insertedTag of insertedIntoTags) {
                 if (insertedTag === targetTag) count++;
             }
@@ -632,45 +651,65 @@ class RoomListStore extends Store {
     }
 
     _generateInitialRoomLists() {
+        // ERROR HAPPENS HERE????
         // Log something to show that we're throwing away the old results. This is for the inevitable
         // question of "why is 100% of my CPU going towards Riot?" - a quick look at the logs would reveal
         // that something is wrong with the RoomListStore.
         const lists = {
             "m.server_notice": [],
             "im.vector.fake.invite": [],
-            "u.phone": [],
-            "u.doors": [],
-            "m.favourite": [],
-            "im.vector.fake.recent": [],
-            "im.vector.fake.direct": [],
-            "m.lowpriority": [],
-            "im.vector.fake.archived": []
+            "u.phone": [], // DOESN'T SHOW - THESE SHOULD BE DEFAULT ROOMS
+            "u.doors": [], // DOESN'T SHOW -
+            "m.favourite": [], // ONE
+            "im.vector.fake.recent": [], // ROOM ORDERING
+            "im.vector.fake.direct": [], // TWO
+            "m.lowpriority": [], // THREE
+            "im.vector.fake.archived": [] // WHEN MEMBERSHIP IS !JOIN
+            // DEFAULT DOES HAVE TAGS ITS THE NEW ROOMS ARE NOT SET WITH CUSTOM TAGS
         };
 
         const dmRoomMap = DMRoomMap.shared();
 
+        // THIS RUNS ON EVERY JOIN -----
+        // SO THIS SHOULD NOT SET TAGS
+        // ONLY DEFINE WHAT TO DO WHEN IT RECEIVES THOSE TAGS
         this._matrixClient.getRooms().forEach(room => {
             const myUserId = this._matrixClient.getUserId();
             const membership = room.getMyMembership();
             const me = room.getMember(myUserId);
 
+            //console.log("+++++++++++++++++");
+            //console.log("MY USER ID", myUserId);
+            //console.log("MEMBERSHIP", membership);
+            //console.log("ME", me);
+            //console.log("+++++++++++++++++");
+
+            // ONE -- INVITE
             if (membership === "invite") {
+                //console.log("** INVITE MEMBERSHIP RUN");
                 lists["im.vector.fake.invite"].push({
                     room,
                     category: CATEGORY_RED
                 });
+                // TWO -- JOIN/BAN
             } else if (
                 membership === "join" ||
                 membership === "ban" ||
                 (me && me.isKicked())
             ) {
+                //console.log("** JOIN MEMBERSHIP RUN");
+                //tagNames = "u.phone";
+
                 // Used to split rooms via tags
                 let tagNames = Object.keys(room.tags);
+                //console.log("WHAT ARE MY TAG_NAMES", tagNames);
 
                 // ignore any m. tag names we don't know about
                 tagNames = tagNames.filter(t => {
                     // Speed optimization: Avoid hitting the SettingsStore at all costs by making it the
                     // last condition possible.
+                    // LISTS DOES CONTAIN ALL THE SPECIAL TAGS
+                    //console.log("** TAGNAMES FILTER: LISTS", lists);
                     return (
                         lists[t] !== undefined ||
                         (!t.startsWith("m.") && this._state.tagsEnabled)
@@ -689,6 +728,10 @@ class RoomListStore extends Store {
                         lists[tagName].push({ room, category: category });
                     }
                 } else if (dmRoomMap.getUserIdForRoomId(room.roomId)) {
+                    //console.log(
+                    //"**** DIRECT MESSAGE LIST IS GETTING THIS ROOM PUSHED",
+                    //lists
+                    //);
                     // "Direct Message" rooms (that we're still in and that aren't otherwise tagged)
                     lists["im.vector.fake.direct"].push({
                         room,
@@ -700,7 +743,9 @@ class RoomListStore extends Store {
                         category: this._calculateCategory(room)
                     });
                 }
+                // THREE -- LEAVE
             } else if (membership === "leave") {
+                //console.log("** LEAVE MEMBERSHIP RUN");
                 // The category of these rooms is not super important, so deprioritize it to the lowest
                 // possible value.
                 lists["im.vector.fake.archived"].push({
@@ -708,7 +753,7 @@ class RoomListStore extends Store {
                     category: CATEGORY_IDLE
                 });
             }
-        });
+        }); // END OF MATRIX_CLIENT GET ROOMS
 
         // We use this cache in the recents comparator because _tsOfNewestEvent can take a while. This
         // cache only needs to survive the sort operation below and should not be implemented outside
@@ -818,6 +863,9 @@ class RoomListStore extends Store {
     }
 
     _lexicographicalComparator(roomA, roomB) {
+        //console.log("******");
+        //console.log("COMPARING ROOM_A TO ROOM_B");
+        //console.log("******");
         return roomA.name > roomB.name ? 1 : -1;
     }
 

@@ -85,6 +85,7 @@ module.exports = createReactClass({
                 const subList = this._subListRefs[key];
                 if (subList) {
                     subList.setHeight(size);
+                    //console.log("*** WHAT IS THE SUB_LIST?", subList);
                 }
                 // update overflow indicators
                 this._checkSubListsOverflow();
@@ -129,12 +130,17 @@ module.exports = createReactClass({
             hover: false,
             customTags: CustomRoomTagStore.getTags()
         };
-    },
+    }, // END OF GET INITIAL STATE
 
     componentWillMount: function() {
         this.mounted = false;
 
         const cli = MatrixClientPeg.get();
+        // console.log("ROOMLIST <line 139> CLI", cli); // META_DATA
+        // console.log("--------------");
+        // SOMETHING HERE IS UNDEFINED
+        console.log("** THIS COMPONENT NEVER MOUNTS <ROOMLIST 142>");
+        console.log("** ROOM", this.onRoom);
 
         cli.on("Room", this.onRoom);
         cli.on("deleteRoom", this.onDeleteRoom);
@@ -238,12 +244,13 @@ module.exports = createReactClass({
     },
 
     onAction: function(payload) {
+        let call;
         switch (payload.action) {
             case "view_tooltip":
                 this.tooltip = payload.tooltip;
                 break;
             case "call_state":
-                let call = CallHandler.getCall(payload.room_id);
+                call = CallHandler.getCall(payload.room_id);
                 if (call && call.call_state === "ringing") {
                     this.setState({
                         incomingCall: call,
@@ -742,6 +749,8 @@ module.exports = createReactClass({
         });
 
         subListsProps = subListsProps.filter(props => {
+            //console.log("TRYING TO GET THE LENGTH OF THIS: ==> ", props);
+            //console.log("END OF ERROR *************************");
             const len =
                 props.list.length +
                 (props.extraTiles ? props.extraTiles.length : 0);
@@ -802,9 +811,23 @@ module.exports = createReactClass({
     render: function() {
         const incomingCallIfTaggedAs = tagName => {
             //console.log("THIS IS THE TAG NAME", tagName);
-
+            /*console.log("---------------------");
+            console.log(
+                "RETURNING NULL IF NO state === incomingCall || incomingCallTag",
+                this.state.incomingCall
+            );
+            console.log("INCOMING CALL TAG", this.state.incomingCallTag);
+            console.log("TAG NAME", tagName);
+            console.log(
+                "WHAT IS THIS.STATE.INCOMING_CALL",
+                this.state.incomingCall
+            );
+            console.log("---------------------");*/
             if (!this.state.incomingCall) return null;
-            if (this.state.incomingCallTag !== tagName) return null;
+            if (this.state.incomingCallTag !== tagName) {
+                console.log("THIS IS A MATCH for", tagName);
+                return null;
+            }
             return this.state.incomingCall;
         };
         // incomingCallIfTaggedAs = im.vector.fake.direct, archived, invite, u.phone, u.doors
@@ -830,21 +853,25 @@ module.exports = createReactClass({
                 order: "manual",
                 incomingCall: incomingCallIfTaggedAs("m.favourite")
             },
-            {
-                list: this.state.lists["u.phone"],
+            /*{
+                //list: this.state.lists["u.phone"],
+                //list: this.state.lists["im.vector.fake.direct"],
+                //list: [],
                 label: _t("Phone Calls"),
                 // IS TAG_NAME GETTER OR SETTER?
                 tagName: "u.phone",
                 order: "recent",
                 incomingCall: incomingCallIfTaggedAs("u.phone"),
                 onAddRoom: () => {
+                    //console.log("CREATING A NEW PHONE CALL");
                     dis.dispatch({ action: "view_create_phone_call" });
                 },
                 addRoomLabel: _t("Place call")
-            },
-            {
-                list: this.state.lists["u.doors"],
-                //list: [],
+            },*/
+            /*{
+                //list: this.state.lists["u.doors"],
+                //list: this.state.lists["im.vector.fake.direct"],
+                list: [],
                 label: _t("Doors"),
                 tagName: "u.doors",
                 order: "recent",
@@ -853,7 +880,7 @@ module.exports = createReactClass({
                 //dis.dispatch({ action: "view_create_phone_call" });
                 //}
                 //addRoomLabel: _t("Place call")
-            },
+            },*/
             {
                 list: this.state.lists["im.vector.fake.direct"],
                 label: _t("People"),
@@ -886,6 +913,9 @@ module.exports = createReactClass({
                 );
             })
             .map(tagName => {
+                //console.log("<<<<<<<>>>>>>>");
+                //console.log("WHAT ARE THE TAGS <line 892> ", this.state.lists);
+                //console.log("<<<<<<<>>>>>>>");
                 return {
                     list: this.state.lists[tagName],
                     //key: "VOIP CALLS",// ALWAYS SETS PHONE AS ROOM NAME

@@ -49,9 +49,9 @@ RoomListActions.tagRoom = function(
     newIndex
 ) {
     let metaData = null;
-    console.log(
-        "TAG IS GETTING SET IN ROOM LIST ACTIONS FUNCTION /actions/RoomListActions"
-    ); // NOPE NOT HERE, IN _isDmChat located in RoomInvite Component
+    //console.log(
+    //"TAG IS GETTING SET IN ROOM LIST ACTIONS FUNCTION /actions/RoomListActions"
+    //); // NOPE NOT HERE, IN _isDmChat located in RoomInvite Component
 
     // Is the tag ordered manually?
     if (
